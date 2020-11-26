@@ -128,7 +128,7 @@ async def helix(context, *, question = None):
         await context.send(f'{context.author.mention} Consult the Fossil. {ehelix}')
 
 @client.command(brief       = 'Performs a web search', ############################################################ find
-                description = 'Search google, youtube, duckduckgo, bing, wikipedia, github, archwiki or gentoowiki.')
+                description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
     if(   'google'     == engine):                        header = 'https://google.com/search?q='
     elif(('youtube'    == engine) or ('yt'   == engine)): header = 'https://www.youtube.com/results?search_query='
@@ -138,6 +138,8 @@ async def find(context, engine = None, *, query = None):
     elif(('github'     == engine) or ('gh'   == engine)): header = 'https://github.com/search?q='
     elif(('archwiki'   == engine) or ('aw'   == engine)): header = 'https://wiki.archlinux.org/index.php?search='
     elif(('gentoowiki' == engine) or ('gw'   == engine)): header = 'https://wiki.gentoo.org/index.php?&search='
+    elif(('winedb'     == engine) or ('wdb'  == engine)): header = 'https://www.winehq.org/search?q='
+    elif(('protondb'   == engine) or ('pdb'  == engine)): header = 'https://www.protondb.com/search?q='
     elif(('pornhub'    == engine) or ('ph'   == engine)):
         await context.send(f'{context.author.mention} No.')
         return
