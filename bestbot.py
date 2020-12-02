@@ -3,10 +3,10 @@
 ########################################################################################################################
 import discord
 from discord.ext import commands
-import random # for helix
+import random              # for helix
 from random import randint # for roll
-from requests import get # for ip
-import urllib # for find
+from requests import get   # for ip
+import urllib              # for find
 from urllib import request # for find
 
 ########################################################################################################################
@@ -116,31 +116,32 @@ async def coin(context, *, terms = None):
                 description = 'Consult the Helix Fossil. It shall answer.',
                 aliases = ['fossil'])
 async def helix(context, *, question = None):
-    responses = ['It is certain.'          , 'It is decidedly so.', 'Without a doubt.'          , 'Yes – definitely.'  ,
-                 'You may rely on it.'     , 'As I see it, yes.'  , 'Most likely.'              , 'Outlook good.'      ,
-                 'Yes.'                    , 'Signs point to yes.', 'Reply hazy, try again.'    , 'Ask again later.'   ,
-                 'Better not tell you now.', 'Cannot predict now.', 'Concentrate and ask again.', 'Don\'t count on it.',
-                 'My reply is no.'         ,  'My sources say no.', 'Outlook not so good.'      , 'Very doubtful.'     ,
-                 'Wouldn\'t you want to know, weather boy?']
+    replies = ['It is certain.'          , 'It is decidedly so.', 'Without a doubt.'          , 'Yes – definitely.'  ,
+               'You may rely on it.'     , 'As I see it, yes.'  , 'Most likely.'              , 'Outlook good.'      ,
+               'Yes.'                    , 'Signs point to yes.', 'Reply hazy, try again.'    , 'Ask again later.'   ,
+               'Better not tell you now.', 'Cannot predict now.', 'Concentrate and ask again.', 'Don\'t count on it.',
+               'My reply is no.'         ,  'My sources say no.', 'Outlook not so good.'      , 'Very doubtful.'     ,
+               'Wouldn\'t you want to know, weather boy?']
     if(None != question): # check for at least 1 argument
-        await context.send(f'{context.author.mention} Helix Fossil says: {ehelix} *{random.choice(responses)}* {ehelix}')
+        await context.send(f'{context.author.mention} Helix Fossil says: {ehelix} *{random.choice(replies)}* {ehelix}')
     else:
         await context.send(f'{context.author.mention} Consult the Fossil. {ehelix}')
 
 @client.command(brief       = 'Performs a web search', ############################################################ find
                 description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
-    if(   'google'     == engine):                        header = 'https://google.com/search?q='
-    elif(('youtube'    == engine) or ('yt'   == engine)): header = 'https://www.youtube.com/results?search_query='
-    elif(('duckduckgo' == engine) or ('ddg'  == engine)): header = 'https://duckduckgo.com/?q='
-    elif( 'bing'       == engine):                        header = 'https://bing.com/search?q='
-    elif(('wikipedia'  == engine) or ('wiki' == engine)): header = 'https://en.wikipedia.org/wiki/Search?search='
-    elif(('github'     == engine) or ('gh'   == engine)): header = 'https://github.com/search?q='
-    elif(('archwiki'   == engine) or ('aw'   == engine)): header = 'https://wiki.archlinux.org/index.php?search='
-    elif(('gentoowiki' == engine) or ('gw'   == engine)): header = 'https://wiki.gentoo.org/index.php?&search='
-    elif(('winedb'     == engine) or ('wdb'  == engine)): header = 'https://www.winehq.org/search?q='
-    elif(('protondb'   == engine) or ('pdb'  == engine)): header = 'https://www.protondb.com/search?q='
-    elif(('pornhub'    == engine) or ('ph'   == engine)):
+    if(  'google' == engine): header = 'https://www.google.com/search?q='
+    elif('yt'     == engine): header = 'https://www.youtube.com/results?search_query='
+    elif('ddg'    == engine): header = 'https://duckduckgo.com/?q='
+    elif('bing'   == engine): header = 'https://www.bing.com/search?q='
+    elif('wiki'   == engine): header = 'https://en.wikipedia.org/wiki/Search?search='
+    elif('gh'     == engine): header = 'https://github.com/search?q='
+    elif('aw'     == engine): header = 'https://wiki.archlinux.org/index.php?search='
+    elif('gw'     == engine): header = 'https://wiki.gentoo.org/index.php?search='
+    elif('pcgw'   == engine): header = 'https://www.pcgamingwiki.com/w/index.php?search='
+    elif('wdb'    == engine): header = 'https://www.winehq.org/search?q='
+    elif('pdb'    == engine): header = 'https://www.protondb.com/search?q='
+    elif('ph'     == engine):
         await context.send(f'{context.author.mention} No.')
         return
     else:
