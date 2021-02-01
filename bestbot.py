@@ -153,7 +153,32 @@ async def find(context, engine = None, *, query = None):
     else:
         await context.send(f'{context.author.mention} What should I search for?')
 
+@client.command(brief       = 'Toggles a role', ################################################################### role
+                description = 'Toggles a role. Choose between `pingbait` and `pingbait`.')
+async def role(context, role = None, noarg = None):
+    member = context.author
+
+    if(None == noarg):
+        if('pingbait' == role):
+            role = discord.utils.get(member.guild.roles, name="pingbait")
+            if(role in member.roles):
+                await discord.Member.remove_roles(member, role)
+                await context.send(f'{context.author.mention} Removed role.')
+            else:
+                await discord.Member.add_roles(member, role)
+                await context.send(f'{context.author.mention} Added role.')
+        elif(None == role):
+            await context.send(f'{context.author.mention} You must specify a role; see `/help role`.')
+        else:
+            await context.send(f'{context.author.mention} Unsupported role.')
+    else:
+        await context.send(f'{context.author.mention} Incorrect command usage; see `/help role`.')
+
 ########################################################################################################################
 # RUN
 ########################################################################################################################
 client.run(btoken)
+
+########################################################################################################################
+# END OF FILE
+########################################################################################################################
