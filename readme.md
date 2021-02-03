@@ -9,8 +9,9 @@ Simple Discord bot with some basic functionality that I need
 #### Steps
 * The `res` directory contains private data which must be filled:
     * a `btoken` file with the bot's token (generated on Discord's developer portal)
-    * an `cadmin` file with a text channel id from my server
-    * a `ehelix` file with an emote id from my server
+    * a `cadmin` file with a text channel id from my server
+    * an `ehelix` file with an emote id from my server
+    * a `blist` file a list of blacklisted words
     * You will want to use your data as necessary and/or update the bot
 * Run with `Python 3`
 * Use the bot with the `/` prefix; see `/help` once online (unless you already read the code)
