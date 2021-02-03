@@ -20,6 +20,11 @@ btoken = open('res/btoken', 'r').read().strip('\n')
 cadmin = open('res/cadmin', 'r').read().strip('\n')
 ehelix = open('res/ehelix', 'r').read().strip('\n')
 
+with open('res/blist', 'r') as blist:
+    global blacklist
+    words     = blist.read()
+    blacklist = words.split()
+
 @client.event
 async def on_ready():
     print('Bestbot online.')
@@ -157,7 +162,6 @@ async def find(context, engine = None, *, query = None):
                 description = 'Toggles a role. Choose between `pingbait` and `pingbait`.')
 async def role(context, role = None, noarg = None):
     member = context.author
-
     if(None == noarg):
         if('pingbait' == role):
             role = discord.utils.get(member.guild.roles, name="pingbait")
@@ -173,6 +177,16 @@ async def role(context, role = None, noarg = None):
             await context.send(f'{context.author.mention} Unsupported role.')
     else:
         await context.send(f'{context.author.mention} Incorrect command usage; see `/help role`.')
+
+########################################################################################################################
+# EVENTS
+########################################################################################################################
+@client.event ################################################################################################ blacklist
+async def on_message(message):
+    for word in blacklist:
+        if word in message.content.lower():
+            await message.delete()
+    await client.process_commands(message)
 
 ########################################################################################################################
 # RUN
