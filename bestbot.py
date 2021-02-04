@@ -139,6 +139,7 @@ async def find(context, engine = None, *, query = None):
     elif('yt'     == engine): header = 'https://www.youtube.com/results?search_query='
     elif('ddg'    == engine): header = 'https://duckduckgo.com/?q='
     elif('bing'   == engine): header = 'https://www.bing.com/search?q='
+    elif('sp'     == engine): header = 'https://startpage.com/do/search?q='
     elif('wiki'   == engine): header = 'https://en.wikipedia.org/wiki/Search?search='
     elif('gh'     == engine): header = 'https://github.com/search?q='
     elif('aw'     == engine): header = 'https://wiki.archlinux.org/index.php?search='
