@@ -20,6 +20,12 @@ btoken = open('res/btoken', 'r').read().strip('\n')
 cadmin = open('res/cadmin', 'r').read().strip('\n')
 ehelix = open('res/ehelix', 'r').read().strip('\n')
 
+if os.path.exists('res/currconv'):
+	import currency
+	currconv = open('res/currconv', 'r').read().strip('\n') # https://www.currencyconverterapi.com/
+else:
+	currconv = None
+
 with open('res/blist', 'r') as blist:
     global blacklist
     words     = blist.read()
@@ -178,6 +184,41 @@ async def role(context, role = None, noarg = None):
             await context.send(f'{context.author.mention} Unsupported role.')
     else:
         await context.send(f'{context.author.mention} Incorrect command usage; see `/help role`.')
+
+
+@client.command(brief       = 'Currency converter.', ################################################################ cconvert
+                description = 'Outputs the currency conversion from one to another.')
+async def currency_convert(context, amount=None, origin_currency=None, desired_currency=None):
+	usage = 'convert [amount] [source currency] [desired currency]\nCurrencies must be given as their 3-letter identifier, like USD and PHP.'
+	
+	# retrieve currency data if we don't have it stored.
+	if not 'currencies.json' in os.listdir('./res'):
+		await currency.retrieve_currencies(currconv)
+	
+	# load list of currencies
+	with open('./res/currencies.json', 'r') as f:
+		available_currencies = json.load(f)
+	
+	# verify user input
+	if not re.match('^\d+(\.\d+)?$', amount):
+		context.send('First argument must be an amount.\n' + usage)
+		return
+	
+	origin_currency = origin_currency.upper()
+	desired_currency = desired_currency.upper()
+	
+	if origin_currency not in available_currencies:
+		context.send('Unknown origin currency.\n' + usage)
+		return
+	
+	if desired_currency not in available_currencies:
+		context.send('Unknown desired currency.\n' + usage)
+		return
+	
+	# send the request
+	exchanged = await currency.currency_convert(currconv, amount, origin_currency, desired_currency)
+	context.send(f'{amount} {origin_currency} is {exchanged} {desired_currency}')
+	
 
 ########################################################################################################################
 # EVENTS
