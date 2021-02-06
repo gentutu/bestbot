@@ -1,6 +1,8 @@
 ########################################################################################################################
 # INCLUDES
 ########################################################################################################################
+import os
+import json                # for conv
 import discord
 from discord.ext import commands
 import random              # for helix
@@ -21,10 +23,10 @@ cadmin = open('res/cadmin', 'r').read().strip('\n')
 ehelix = open('res/ehelix', 'r').read().strip('\n')
 
 if os.path.exists('res/currconv'):
-	import currency
-	currconv = open('res/currconv', 'r').read().strip('\n') # https://www.currencyconverterapi.com/
+    import currency
+    currconv = open('res/currconv', 'r').read().strip('\n') # https://www.currencyconverterapi.com/
 else:
-	currconv = None
+    currconv = None
 
 with open('res/blist', 'r') as blist:
     global blacklist
@@ -186,39 +188,38 @@ async def role(context, role = None, noarg = None):
         await context.send(f'{context.author.mention} Incorrect command usage; see `/help role`.')
 
 
-@client.command(brief       = 'Currency converter.', ################################################################ cconvert
-                description = 'Outputs the currency conversion from one to another.')
-async def currency_convert(context, amount=None, origin_currency=None, desired_currency=None):
-	usage = 'convert [amount] [source currency] [desired currency]\nCurrencies must be given as their 3-letter identifier, like USD and PHP.'
-	
-	# retrieve currency data if we don't have it stored.
-	if not 'currencies.json' in os.listdir('./res'):
-		await currency.retrieve_currencies(currconv)
-	
-	# load list of currencies
-	with open('./res/currencies.json', 'r') as f:
-		available_currencies = json.load(f)
-	
-	# verify user input
-	if not re.match('^\d+(\.\d+)?$', amount):
-		context.send('First argument must be an amount.\n' + usage)
-		return
-	
-	origin_currency = origin_currency.upper()
-	desired_currency = desired_currency.upper()
-	
-	if origin_currency not in available_currencies:
-		context.send('Unknown origin currency.\n' + usage)
-		return
-	
-	if desired_currency not in available_currencies:
-		context.send('Unknown desired currency.\n' + usage)
-		return
-	
-	# send the request
-	exchanged = await currency.currency_convert(currconv, amount, origin_currency, desired_currency)
-	context.send(f'{amount} {origin_currency} is {exchanged} {desired_currency}')
-	
+@client.command(brief       = 'Converts currency.', ############################################################### conv
+                description = 'Converts currency. Only works with int values for simplicity\'s sake')
+async def conv(context, amount = None, source = None, destination = None, noarg = None):
+    try: # check for int amount
+        isinstance(amount, int)
+        amount = int(amount)
+        if((None != noarg)       or \
+           (None == source)      or \
+           (None == destination) or \
+           (None == amount)):
+            raise Exception()
+    except Exception:
+        await context.send(f'{context.author.mention} Incorrect arguments. Use `!clear [amount > 0] confirm`.')
+        return
+
+    source      = source.upper()
+    destination = destination.upper()
+
+    with open('./res/currencies.json', 'r') as storedCurrencies: # load list of currencies
+        available_currencies = json.load(storedCurrencies)
+
+    if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
+        await currency.retrieve_currencies(currconv)
+
+    if(source      not in available_currencies) or \
+      (destination not in available_currencies):
+        await context.send(f'{context.author.mention} Unknown currency. See `/help conv`')
+        return
+
+    exchanged = await currency.currency_convert(currconv, amount, source, destination)
+    await context.send(f'{context.author.mention} {amount} {source} = {destination} {exchanged}')
+
 
 ########################################################################################################################
 # EVENTS
