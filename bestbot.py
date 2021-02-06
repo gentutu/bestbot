@@ -189,7 +189,7 @@ async def role(context, role = None, noarg = None):
 
 
 @client.command(brief       = 'Converts currency.', ############################################################### conv
-                description = 'Converts currency. Only works with int values for simplicity\'s sake')
+                description = 'Converts currency. Only works with int values for simplicity\'s sake.')
 async def conv(context, amount = None, source = None, destination = None, noarg = None):
     try: # check for int amount
         isinstance(amount, int)
@@ -200,7 +200,7 @@ async def conv(context, amount = None, source = None, destination = None, noarg 
            (None == amount)):
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} Incorrect arguments. Use `!clear [amount > 0] confirm`.')
+        await context.send(f'{context.author.mention} Incorrect arguments. See `/help conv`.')
         return
 
     source      = source.upper()
@@ -215,6 +215,10 @@ async def conv(context, amount = None, source = None, destination = None, noarg 
     if(source      not in available_currencies) or \
       (destination not in available_currencies):
         await context.send(f'{context.author.mention} Unknown currency. See `/help conv`')
+        return
+
+    if(source == destination):
+        await context.send(f'{context.author.mention} Nothing to convert.')
         return
 
     exchanged = await currency.currency_convert(currconv, amount, source, destination)
