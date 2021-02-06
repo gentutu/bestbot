@@ -43,7 +43,7 @@ async def currency_convert(api_key, amount, original, desired):
 
     exchange_rate = await get_exchange_rate(api_key, original, desired)
 
-    return int((float(amount) * float(exchange_rate)))
+    return (float(amount) * float(exchange_rate))
 
 if __name__ == '__main__':
     import sys, os
