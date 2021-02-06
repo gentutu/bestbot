@@ -187,10 +187,10 @@ async def role(context, role = None, noarg = None):
 
 
 @client.command(brief       = 'Converts currency.', ############################################################### conv
-                description = 'Converts currency. Only works with int values for simplicity\'s sake.')
+                description = 'Converts currency.')
 async def conv(context, amount = None, source = None, destination = None, noarg = None):
     try: # check for int amount
-        amount = int(amount)
+        amount = float(amount)
         if((None != noarg)       or \
            (None == source)      or \
            (None == destination) or \
