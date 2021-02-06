@@ -187,39 +187,39 @@ async def role(context, role = None, noarg = None):
 
 
 @client.command(brief       = 'Converts currency.', ############################################################### conv
-                description = 'Converts currency.')
-async def conv(context, amount = None, source = None, destination = None, noarg = None):
+                description = 'Converts currency. Use the 3-letter currency codes.')
+async def conv(context, amount = None, fromCurr = None, toCurr = None, noarg = None):
     try: # check for int amount
         amount = float(amount)
-        if((None != noarg)       or \
-           (None == source)      or \
-           (None == destination) or \
+        if((None != noarg)    or \
+           (None == fromCurr) or \
+           (None == toCurr)   or \
            (None == amount)):
             raise Exception()
     except Exception:
         await context.send(f'{context.author.mention} Incorrect arguments. See `/help conv`.')
         return
 
-    source      = source.upper()
-    destination = destination.upper()
+    fromCurr = fromCurr.upper()
+    toCurr   = toCurr.upper()
 
-    with open('./res/currencies.json', 'r') as storedCurrencies: # load list of currencies
-        available_currencies = json.load(storedCurrencies)
+    with open('./res/currencies.json', 'r') as storedCurr: # load list of currencies
+        availableCurr = json.load(storedCurr)
 
     if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
         await currency.retrieve_currencies(currconv)
 
-    if(source      not in available_currencies) or \
-      (destination not in available_currencies):
+    if(fromCurr not in availableCurr) or \
+      (toCurr   not in availableCurr):
         await context.send(f'{context.author.mention} Unknown currency. See `/help conv`')
         return
 
-    if(source == destination):
+    if(fromCurr == toCurr):
         await context.send(f'{context.author.mention} Nothing to convert.')
         return
 
-    exchanged = await currency.currency_convert(currconv, amount, source, destination)
-    await context.send(f'{context.author.mention} **{amount:.2f}** `{source}` ≈ `{destination}` **{exchanged:.2f}**')
+    exchanged = await currency.currency_convert(currconv, amount, fromCurr, toCurr)
+    await context.send(f'{context.author.mention} **{amount:.2f}** `{fromCurr}` ≈ `{toCurr}` **{exchanged:.2f}**')
 
 
 ########################################################################################################################
