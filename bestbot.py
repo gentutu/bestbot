@@ -62,7 +62,6 @@ async def clear(context, amount = None, confirm = None, noarg = None):
     if(True == context.author.guild_permissions.manage_messages): # check for user permissions
         try: # check for correct argument type
             if((None == noarg) and ('confirm' == confirm)): # check for no third argument
-                isinstance(amount, int) # try to raise exception if wrong argument
                 amount = int(amount)
                 if(0 == amount):
                     raise Exception()
@@ -103,7 +102,6 @@ async def ping(context, noarg = None):
                 aliases     = ['dice'])
 async def roll(context, maximum = None, *, terms = None):
     try: # check for correct argument type
-        isinstance(maximum, int)
         maximum = int(maximum)
         if(1 < maximum):
             if(None == terms):
@@ -192,7 +190,6 @@ async def role(context, role = None, noarg = None):
                 description = 'Converts currency. Only works with int values for simplicity\'s sake.')
 async def conv(context, amount = None, source = None, destination = None, noarg = None):
     try: # check for int amount
-        isinstance(amount, int)
         amount = int(amount)
         if((None != noarg)       or \
            (None == source)      or \
@@ -222,7 +219,7 @@ async def conv(context, amount = None, source = None, destination = None, noarg 
         return
 
     exchanged = await currency.currency_convert(currconv, amount, source, destination)
-    await context.send(f'{context.author.mention} {amount} {source} = {destination} {exchanged}')
+    await context.send(f'{context.author.mention} **{amount:.2f}** `{source}` ≈ `{destination}` **{exchanged:.2f}**')
 
 
 ########################################################################################################################
