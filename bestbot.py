@@ -28,10 +28,13 @@ if os.path.exists('res/currconv'):
 else:
     currconv = None
 
-with open('res/blist', 'r') as blist:
+with open('res/blist', 'r') as words:
     global blacklist
-    words     = blist.read()
-    blacklist = words.split()
+    blacklist = words.read().split()
+
+with open('res/croles', 'r') as croles:
+    global roles
+    roles = croles.read().split()
 
 @client.event
 async def on_ready():
@@ -166,12 +169,12 @@ async def find(context, engine = None, *, query = None):
         await context.send(f'{context.author.mention} What should I search for?')
 
 @client.command(brief       = 'Toggles a role', ################################################################### role
-                description = 'Toggles a role. Choose between `pingbait` and `pingbait`.')
+                description = 'Toggles a role. Too many to list here.')
 async def role(context, role = None, noarg = None):
     member = context.author
     if(None == noarg):
-        if('pingbait' == role):
-            role = discord.utils.get(member.guild.roles, name="pingbait")
+        if role in roles:
+            role = discord.utils.get(member.guild.roles, name=role)
             if(role in member.roles):
                 await discord.Member.remove_roles(member, role)
                 await context.send(f'{context.author.mention} Removed role.')
@@ -219,7 +222,7 @@ async def conv(context, amount = None, fromCurr = None, toCurr = None, noarg = N
         return
 
     exchanged = await currency.currency_convert(currconv, amount, fromCurr, toCurr)
-    await context.send(f'{context.author.mention} **{amount:.2f}** `{fromCurr}` ≈ `{toCurr}` **{exchanged:.2f}**')
+    await context.send(f'{context.author.mention} {amount:.2f} `{fromCurr}` ≈ `{toCurr}` {exchanged:.2f}')
 
 
 ########################################################################################################################
