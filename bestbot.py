@@ -18,23 +18,52 @@ client = commands.Bot(command_prefix = '/')
 
 ghlink = 'https://github.com/gentutu/bestbot'
 
-btoken = open('res/btoken', 'r').read().strip('\n')
-cadmin = open('res/cadmin', 'r').read().strip('\n')
-ehelix = open('res/ehelix', 'r').read().strip('\n')
+file_blist    = 'res/blist'
+file_btoken   = 'res/btoken'
+file_cadmin   = 'res/cadmin'
+file_croles   = 'res/croles'
+file_ehelix   = 'res/ehelix'
+file_currconv = 'res/currconv'
 
-if os.path.exists('res/currconv'):
+if os.path.exists(file_blist):
+    with open(file_blist, 'r') as blacklist:
+        global blist
+        blist = blacklist.read().split()
+else:
+    print(f'Error: {file_blist} file missing')
+    exit()
+
+if os.path.exists(file_btoken):
+    btoken = open(file_btoken, 'r').read().strip('\n')
+else:
+    print(f'Error: {file_btoken} file missing')
+    exit()
+
+if os.path.exists(file_cadmin):
+    cadmin = open(file_cadmin, 'r').read().strip('\n')
+else:
+    print(f'Error: {file_cadmin} file missing')
+    exit()
+
+if os.path.exists(file_croles):
+    with open(file_croles, 'r') as cosmeticRoles:
+        global croles
+        croles = cosmeticRoles.read().split()
+else:
+    print(f'Error: {file_croles} file missing')
+    exit()
+
+if os.path.exists(file_ehelix):
+    ehelix = open(file_ehelix, 'r').read().strip('\n')
+else:
+    print(f'Error: {file_ehelix} file missing')
+    exit()
+
+if os.path.exists(file_currconv):
     import currency
-    currconv = open('res/currconv', 'r').read().strip('\n') # https://www.currencyconverterapi.com/
+    currconv = open(file_currconv, 'r').read().strip('\n') # https://www.currencyconverterapi.com/
 else:
     currconv = None
-
-with open('res/blist', 'r') as words:
-    global blacklist
-    blacklist = words.read().split()
-
-with open('res/croles', 'r') as croles:
-    global roles
-    roles = croles.read().split()
 
 @client.event
 async def on_ready():
@@ -47,39 +76,42 @@ async def on_ready():
 @client.command(brief       = 'Shows the host\'s WAN IP', ########################################################### ip
                 description = '[admin] Shows the host\'s WAN IP.')
 async def ip(context, noarg = None):
-    if(True == context.author.guild_permissions.administrator): # check for user permissions
-        if(None == noarg): # check for no arguments
-            if(int(cadmin) == context.channel.id):
-                ip = get('https://api.ipify.org').text
-                await context.send(f'{context.author.mention} WAN IP: ||`{ip}`||')
-            else:
-                await context.send(f'{context.author.mention} Command not available on current channel.')
-        else:
-            await context.send(f'{context.author.mention} Command does not take arguments.')
-    else:
+    if(True != context.author.guild_permissions.administrator): # check for user permissions
         await context.send(f'{context.author.mention} Permission denied.')
+        return
+
+    if(None != noarg): # check for no arguments
+        await context.send(f'{context.author.mention} Command does not take arguments.')
+        return
+
+    if(int(cadmin) == context.channel.id):
+        ip = get('https://api.ipify.org').text
+        await context.send(f'{context.author.mention} WAN IP: ||`{ip}`||')
+    else:
+        await context.send(f'{context.author.mention} Command not available on current channel.')
 
 @client.command(brief       = 'Deletes a specified amount of messages', ########################################## clear
                 description = '[admin/mod] Deletes a specified amount of messages. Call with \'confirm\' argument.')
 async def clear(context, amount = None, confirm = None, noarg = None):
-    if(True == context.author.guild_permissions.manage_messages): # check for user permissions
-        try: # check for correct argument type
-            if((None == noarg) and ('confirm' == confirm)): # check for no third argument
-                amount = int(amount)
-                if(0 == amount):
-                    raise Exception()
-                elif(1 == amount):
-                    await context.channel.purge(limit = amount + 1)
-                    await context.send(f'{context.author.mention} cleared the last message.')
-                else:
-                    await context.channel.purge(limit = amount + 1)
-                    await context.send(f'{context.author.mention} cleared the last {amount} messages.')
-            else:
-                raise Exception()
-        except Exception:
-            await context.send(f'{context.author.mention} Incorrect arguments. Use `!clear [amount > 0] confirm`.')
-    else:
+    if(True != context.author.guild_permissions.manage_messages): # check for user permissions
         await context.send(f'{context.author.mention} Permission denied.')
+        return
+
+    try: # check for correct argument type
+        if((None == noarg) and ('confirm' == confirm)): # check for no third argument
+            amount = int(amount)
+            if(0 == amount):
+                raise Exception()
+            elif(1 == amount):
+                await context.channel.purge(limit = amount + 1)
+                await context.send(f'{context.author.mention} cleared the last message.')
+            else:
+                await context.channel.purge(limit = amount + 1)
+                await context.send(f'{context.author.mention} cleared the last {amount} messages.')
+        else:
+            raise Exception()
+    except Exception:
+        await context.send(f'{context.author.mention} Incorrect arguments. Use `!clear [amount > 0] confirm`.')
 
 ########################################################################################################################
 # UTILITIES
@@ -121,6 +153,7 @@ async def roll(context, maximum = None, *, terms = None):
                 aliases     = ['toss'])
 async def coin(context, *, terms = None):
     sides = ['heads', 'tails']
+
     if(None == terms):
         await context.send(f'{context.author.mention} tossed **{random.choice(sides)}**.')
     else:
@@ -136,6 +169,7 @@ async def helix(context, *, question = None):
                'Better not tell you now.', 'Cannot predict now.', 'Concentrate and ask again.', 'Don\'t count on it.',
                'My reply is no.'         ,  'My sources say no.', 'Outlook not so good.'      , 'Very doubtful.'     ,
                'Wouldn\'t you want to know, weather boy?']
+
     if(None != question): # check for at least 1 argument
         await context.send(f'{context.author.mention} Helix Fossil says: {ehelix} *{random.choice(replies)}* {ehelix}')
     else:
@@ -162,6 +196,7 @@ async def find(context, engine = None, *, query = None):
     else:
         await context.send(f'{context.author.mention} Unknown search engine.')
         return
+
     if(None != query): # check for at least 1 search term
         searchInput = header + urllib.parse.quote(query)
         await context.send(f'{context.author.mention} Your search results: <{searchInput}>')
@@ -172,21 +207,22 @@ async def find(context, engine = None, *, query = None):
                 description = 'Toggles a role. Too many to list here.')
 async def role(context, role = None, noarg = None):
     member = context.author
-    if(None == noarg):
-        if role in roles:
-            role = discord.utils.get(member.guild.roles, name=role)
-            if(role in member.roles):
-                await discord.Member.remove_roles(member, role)
-                await context.send(f'{context.author.mention} Removed role.')
-            else:
-                await discord.Member.add_roles(member, role)
-                await context.send(f'{context.author.mention} Added role.')
-        elif(None == role):
-            await context.send(f'{context.author.mention} You must specify a role; see `/help role`.')
-        else:
-            await context.send(f'{context.author.mention} Unsupported role.')
-    else:
+    if(None != noarg):
         await context.send(f'{context.author.mention} Incorrect command usage; see `/help role`.')
+        return
+
+    if(role in croles):
+        role = discord.utils.get(member.guild.roles, name=role)
+        if(role in member.roles):
+            await discord.Member.remove_roles(member, role)
+            await context.send(f'{context.author.mention} Removed role.')
+        else:
+            await discord.Member.add_roles(member, role)
+            await context.send(f'{context.author.mention} Added role.')
+    elif(None == role):
+        await context.send(f'{context.author.mention} You must specify a role; see `/help role`.')
+    else:
+        await context.send(f'{context.author.mention} Unsupported role.')
 
 
 @client.command(brief       = 'Converts currency.', ############################################################### conv
@@ -230,7 +266,7 @@ async def conv(context, amount = None, fromCurr = None, toCurr = None, noarg = N
 ########################################################################################################################
 @client.event ################################################################################################ blacklist
 async def on_message(message):
-    for word in blacklist:
+    for word in blist:
         if word in message.content.lower():
             await message.delete()
     await client.process_commands(message)

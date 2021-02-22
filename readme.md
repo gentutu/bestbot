@@ -18,8 +18,7 @@ Simple Discord bot with some basic functionality that I need
 * Use the bot with the `/` prefix; see `/help` once online (unless you already read the code)
 
 ### Todo
-* Elegant error handling in case required `res` files are missing
-* Many things could have been done in a less barbaric way
+* Some things could have been done in a less barbaric way
 
 ---
 ### License
