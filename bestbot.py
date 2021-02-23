@@ -204,11 +204,15 @@ async def find(context, engine = None, *, query = None):
         await context.send(f'{context.author.mention} What should I search for?')
 
 @client.command(brief       = 'Toggles a role', ################################################################### role
-                description = 'Toggles a role. Too many to list here.')
+                description = 'Toggles a role. List all options with the `list` argument.')
 async def role(context, role = None, noarg = None):
     member = context.author
     if(None != noarg):
         await context.send(f'{context.author.mention} Incorrect command usage; see `/help role`.')
+        return
+
+    if('list' == role):
+        await context.send(f'{context.author.mention} Available roles: {croles}.')
         return
 
     if(role in croles):
