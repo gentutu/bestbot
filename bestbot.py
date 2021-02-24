@@ -190,6 +190,7 @@ async def find(context, engine = None, *, query = None):
     elif('pcgw'   == engine): header = 'https://www.pcgamingwiki.com/w/index.php?search='
     elif('wdb'    == engine): header = 'https://www.winehq.org/search?q='
     elif('pdb'    == engine): header = 'https://www.protondb.com/search?q='
+    elif('ud'     == engine): header = 'https://www.urbandictionary.com/define.php?term='
     elif('ph'     == engine):
         await context.send(f'{context.author.mention} No.')
         return
