@@ -18,6 +18,10 @@ client = commands.Bot(command_prefix = '/')
 
 ghlink = 'https://github.com/gentutu/bestbot'
 
+red   = 0xAA2222
+green = 0x22AA22
+blue  = 0x224466
+
 file_blist    = 'res/blist'
 file_btoken   = 'res/btoken'
 file_cadmin   = 'res/cadmin'
@@ -86,7 +90,8 @@ async def ip(context, noarg = None):
 
     if(int(cadmin) == context.channel.id):
         ip = get('https://api.ipify.org').text
-        await context.send(f'{context.author.mention} WAN IP: ||`{ip}`||')
+        embed = discord.Embed(title = "Host WAN IP", description = f'||`{ip}`||', color = red)
+        await context.send(embed = embed)
     else:
         await context.send(f'{context.author.mention} Command not available on current channel.')
 
@@ -120,7 +125,8 @@ async def clear(context, amount = None, confirm = None, noarg = None):
                 description = 'Links towards the bot\'s source code.')
 async def source(context, noarg = None):
     if(None == noarg): # check for no arguments
-        await context.send(f'{context.author.mention} See this for my source code: <{ghlink}>')
+        embed = discord.Embed(title = "Best Source", description = f"<{ghlink}>", color = red)
+        await context.send(embed = embed)
     else:
         await context.send(f'{context.author.mention} Command does not take arguments.')
 
@@ -128,7 +134,7 @@ async def source(context, noarg = None):
                 description = 'Check  bot status and network quality.')
 async def ping(context, noarg = None):
     if(None == noarg): # check for no arguments
-        await context.send(f'{context.author.mention} pong! `{round(client.latency * 1000)}ms`')
+        await context.send(f'pong! `{round(client.latency * 1000)}ms`')
     else:
         await context.send(f'{context.author.mention} Command does not take arguments.')
 
@@ -217,7 +223,7 @@ async def role(context, role = None, noarg = None):
         return
 
     if(role in croles):
-        role = discord.utils.get(member.guild.roles, name=role)
+        role = discord.utils.get(member.guild.roles, name = role)
         if(role in member.roles):
             await discord.Member.remove_roles(member, role)
             await context.send(f'{context.author.mention} Removed role.')
