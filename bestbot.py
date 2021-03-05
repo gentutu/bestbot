@@ -197,6 +197,7 @@ async def find(context, engine = None, *, query = None):
     elif('wdb'    == engine): header = 'https://www.winehq.org/search?q='
     elif('pdb'    == engine): header = 'https://www.protondb.com/search?q='
     elif('ud'     == engine): header = 'https://www.urbandictionary.com/define.php?term='
+    elif('mcw'    == engine): header = 'https://minecraft.gamepedia.com/Special:Search?search='
     elif('ph'     == engine):
         await context.send(f'{context.author.mention} No.')
         return
