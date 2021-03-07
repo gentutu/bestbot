@@ -18,54 +18,58 @@ client = commands.Bot(command_prefix = '/')
 
 ghlink = 'https://github.com/gentutu/bestbot'
 
-red   = 0xAA2222
-green = 0x22AA22
-blue  = 0x224466
+colours = {
+    'red'   : 0xAA2222,
+    'green' : 0x22AA22,
+    'blue'  : 0x224466
+}
 
-file_blist    = 'res/blist'
-file_btoken   = 'res/btoken'
-file_cadmin   = 'res/cadmin'
-file_croles   = 'res/croles'
-file_ehelix   = 'res/ehelix'
-file_currconv = 'res/currconv'
+files = {
+    'f_blist'    : 'res/blist',
+    'f_btoken'   : 'res/btoken',
+    'f_cadmin'   : 'res/cadmin',
+    'f_croles'   : 'res/croles',
+    'f_ehelix'   : 'res/ehelix',
+    'f_currconv' : 'res/currconv'
+}
 
-if os.path.exists(file_blist):
-    with open(file_blist, 'r') as blacklist:
+if os.path.exists(files["f_blist"]):
+    with open(files["f_blist"], 'r') as blacklist:
         global blist
         blist = blacklist.read().split()
 else:
-    print(f'Error: {file_blist} file missing')
+    print(f'Error: {files["f_blist"]} file missing')
     exit()
 
-if os.path.exists(file_btoken):
-    btoken = open(file_btoken, 'r').read().strip('\n')
+if os.path.exists(files["f_btoken"]):
+    btoken = open(files["f_btoken"], 'r').read().strip('\n')
 else:
-    print(f'Error: {file_btoken} file missing')
+    print(f'Error: {files["f_btoken"]} file missing')
     exit()
 
-if os.path.exists(file_cadmin):
-    cadmin = open(file_cadmin, 'r').read().strip('\n')
+if os.path.exists(files["f_cadmin"]):
+    cadmin = open(files["f_cadmin"], 'r').read().strip('\n')
 else:
-    print(f'Error: {file_cadmin} file missing')
+    print(f'Error: {files["f_cadmin"]} file missing')
     exit()
 
-if os.path.exists(file_croles):
-    with open(file_croles, 'r') as cosmeticRoles:
+if os.path.exists(files["f_croles"]):
+    with open(files["f_croles"], 'r') as cosmeticRoles:
         global croles
         croles = cosmeticRoles.read().split()
 else:
-    print(f'Error: {file_croles} file missing')
+    print(f'Error: {files["f_croles"]} file missing')
     exit()
 
-if os.path.exists(file_ehelix):
-    ehelix = open(file_ehelix, 'r').read().strip('\n')
+if os.path.exists(files["f_ehelix"]):
+    ehelix = open(files["f_ehelix"], 'r').read().strip('\n')
 else:
-    print(f'Error: {file_ehelix} file missing')
+    print(f'Error: {files["f_ehelix"]} file missing')
     exit()
 
-if os.path.exists(file_currconv):
+if os.path.exists(files["f_currconv"]):
     import currency
-    currconv = open(file_currconv, 'r').read().strip('\n') # https://www.currencyconverterapi.com/
+    currconv = open(files["f_currconv"], 'r').read().strip('\n') # https://www.currencyconverterapi.com/
 else:
     currconv = None
 
@@ -90,7 +94,7 @@ async def ip(context, noarg = None):
 
     if(int(cadmin) == context.channel.id):
         ip = get('https://api.ipify.org').text
-        embed = discord.Embed(title = "Host WAN IP", description = f'||`{ip}`||', color = red)
+        embed = discord.Embed(title = "Host WAN IP", description = f'||`{ip}`||', color = colours["red"])
         await context.send(embed = embed)
     else:
         await context.send(f'{context.author.mention} Command not available on current channel.')
@@ -125,7 +129,7 @@ async def clear(context, amount = None, confirm = None, noarg = None):
                 description = 'Links towards the bot\'s source code.')
 async def source(context, noarg = None):
     if(None == noarg): # check for no arguments
-        embed = discord.Embed(title = "Best Source", description = f"<{ghlink}>", color = red)
+        embed = discord.Embed(title = "Best Source", description = f"<{ghlink}>", color = colours["red"])
         await context.send(embed = embed)
     else:
         await context.send(f'{context.author.mention} Command does not take arguments.')
@@ -237,22 +241,22 @@ async def role(context, role = None, noarg = None):
         await context.send(f'{context.author.mention} Unsupported role.')
 
 
-@client.command(brief       = 'Converts currency.', ############################################################### conv
+@client.command(brief       = 'Converts currency', ################################################################ conv
                 description = 'Converts currency. Use the 3-letter currency codes.')
-async def conv(context, amount = None, fromCurr = None, toCurr = None, noarg = None):
+async def conv(context, amount = None, source = None, target = None, noarg = None):
     try: # check for int amount
         amount = float(amount)
-        if((None != noarg)    or \
-           (None == fromCurr) or \
-           (None == toCurr)   or \
+        if((None != noarg)  or \
+           (None == source) or \
+           (None == target) or \
            (None == amount)):
             raise Exception()
     except Exception:
         await context.send(f'{context.author.mention} Incorrect arguments. See `/help conv`.')
         return
 
-    fromCurr = fromCurr.upper()
-    toCurr   = toCurr.upper()
+    source = source.upper()
+    target = target.upper()
 
     with open('./res/currencies.json', 'r') as storedCurr: # load list of currencies
         availableCurr = json.load(storedCurr)
@@ -260,17 +264,17 @@ async def conv(context, amount = None, fromCurr = None, toCurr = None, noarg = N
     if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
         await currency.retrieve_currencies(currconv)
 
-    if(fromCurr not in availableCurr) or \
-      (toCurr   not in availableCurr):
+    if(source not in availableCurr) or \
+      (target   not in availableCurr):
         await context.send(f'{context.author.mention} Unknown currency. See `/help conv`')
         return
 
-    if(fromCurr == toCurr):
+    if(source == target):
         await context.send(f'{context.author.mention} Nothing to convert.')
         return
 
-    exchanged = await currency.currency_convert(currconv, amount, fromCurr, toCurr)
-    await context.send(f'{context.author.mention} {amount:.2f} `{fromCurr}` ≈ `{toCurr}` {exchanged:.2f}')
+    exchanged = await currency.currency_convert(currconv, amount, source, target)
+    await context.send(f'{context.author.mention} {amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
 
 
 ########################################################################################################################
