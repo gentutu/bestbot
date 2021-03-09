@@ -16,7 +16,8 @@ from urllib import request # for find
 ########################################################################################################################
 client = commands.Bot(command_prefix = '/')
 
-ghlink = 'https://github.com/gentutu/bestbot'
+ghlink     = 'https://github.com/gentutu/bestbot'
+errorReply = 'Incorrect command usage; see `/help [command]`'
 
 colours = {
     'red'   : 0xAA2222,
@@ -89,7 +90,7 @@ async def ip(context, noarg = None):
         return
 
     if(None != noarg): # check for no arguments
-        await context.send(f'{context.author.mention} Command does not take arguments.')
+        await context.send(f'{context.author.mention} {errorReply}.')
         return
 
     if(int(cadmin) == context.channel.id):
@@ -120,7 +121,7 @@ async def clear(context, amount = None, confirm = None, noarg = None):
         else:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} Incorrect arguments; see `/help clear`.')
+        await context.send(f'{context.author.mention} {errorReply}.')
 
 ########################################################################################################################
 # UTILITIES
@@ -132,7 +133,7 @@ async def source(context, noarg = None):
         embed = discord.Embed(title = "Best Source", description = f"<{ghlink}>", color = colours["red"])
         await context.send(embed = embed)
     else:
-        await context.send(f'{context.author.mention} Command does not take arguments.')
+        await context.send(f'{context.author.mention} {errorReply}.')
 
 @client.command(brief       = 'Checks bot status and network quality', ############################################ ping
                 description = 'Check  bot status and network quality.')
@@ -140,7 +141,7 @@ async def ping(context, noarg = None):
     if(None == noarg): # check for no arguments
         await context.send(f'pong! `{round(client.latency * 1000)}ms`')
     else:
-        await context.send(f'{context.author.mention} Command does not take arguments.')
+        await context.send(f'{context.author.mention} {errorReply}.')
 
 @client.command(brief       = 'Rolls for a random number up to a maximum', ######################################## roll
                 description = 'Rolls for a random number up to a maximum.',
@@ -156,7 +157,7 @@ async def roll(context, maximum = None, *, terms = None):
         else:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} Incorrect arguments; see `/help roll`.')
+        await context.send(f'{context.author.mention} {errorReply}`.')
 
 @client.command(brief       = 'Tosses a coin', #################################################################### coin
                 description = 'Tosses a coin. Accepts terms freely.',
@@ -220,7 +221,7 @@ async def find(context, engine = None, *, query = None):
 async def role(context, role = None, noarg = None):
     member = context.author
     if(None != noarg):
-        await context.send(f'{context.author.mention} Incorrect command usage; see `/help role`.')
+        await context.send(f'{context.author.mention} {errorReply}.')
         return
 
     if('list' == role):
@@ -236,7 +237,7 @@ async def role(context, role = None, noarg = None):
             await discord.Member.add_roles(member, role)
             await context.send(f'{context.author.mention} Added role.')
     elif(None == role):
-        await context.send(f'{context.author.mention} You must specify a role; see `/help role`.')
+        await context.send(f'{context.author.mention} {errorReply}.')
     else:
         await context.send(f'{context.author.mention} Unsupported role.')
 
@@ -252,7 +253,7 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
            (None == amount)):
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} Incorrect arguments. See `/help conv`.')
+        await context.send(f'{context.author.mention} {errorReply}.')
         return
 
     source = source.upper()
@@ -265,8 +266,8 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
         await currency.retrieve_currencies(currconv)
 
     if(source not in availableCurr) or \
-      (target   not in availableCurr):
-        await context.send(f'{context.author.mention} Unknown currency. See `/help conv`')
+      (target not in availableCurr):
+        await context.send(f'{context.author.mention} Unknown currency code.')
         return
 
     if(source == target):
