@@ -109,7 +109,7 @@ async def clear(context, amount = None, confirm = None, noarg = None):
     try: # check for correct argument type
         if((None == noarg) and ('confirm' == confirm)): # check for no third argument
             amount = int(amount)
-            if(0 == amount):
+            if(1 > amount):
                 raise Exception()
             elif(1 == amount):
                 await context.channel.purge(limit = amount + 1)
@@ -120,7 +120,7 @@ async def clear(context, amount = None, confirm = None, noarg = None):
         else:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} Incorrect arguments. Use `!clear [amount > 0] confirm`.')
+        await context.send(f'{context.author.mention} Incorrect arguments; see `/help clear`.')
 
 ########################################################################################################################
 # UTILITIES
@@ -156,7 +156,7 @@ async def roll(context, maximum = None, *, terms = None):
         else:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} Incorrect arguments. Use `!roll [maximum > 1]`.')
+        await context.send(f'{context.author.mention} Incorrect arguments; see `/help roll`.')
 
 @client.command(brief       = 'Tosses a coin', #################################################################### coin
                 description = 'Tosses a coin. Accepts terms freely.',
