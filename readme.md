@@ -12,6 +12,7 @@ Simple Discord bot with some basic functionality that I need
     * a `btoken` file with the bot's token (generated on Discord's developer portal)
     * a `cadmin` file with a text channel id from my server
     * a `croles` file with a list of cosmetic roles for the `/role` command
+    * a `currconv` file with the API key generated from [here](https://www.currencyconverterapi.com/)
     * an `ehelix` file with an emote id from my server
     * You will want to use your data as necessary and/or update the bot
 * Run with `Python 3`
