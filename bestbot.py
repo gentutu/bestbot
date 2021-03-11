@@ -178,9 +178,10 @@ async def helix(context, *, question = None):
                'You may rely on it.'     , 'As I see it, yes.'  , 'Most likely.'              , 'Outlook good.'      ,
                'Yes.'                    , 'Signs point to yes.', 'Reply hazy, try again.'    , 'Ask again later.'   ,
                'Better not tell you now.', 'Cannot predict now.', 'Concentrate and ask again.', 'Don\'t count on it.',
-               'My reply is no.'         ,  'My sources say no.', 'Outlook not so good.'      , 'Very doubtful.'     ,
-               'Wouldn\'t you want to know, weather boy?', 'Depends.', 'Perhaps.',       'Maybe.',  
-               'Can\'t say for sure, yet...', 'No.']
+               'My reply is no.'         , 'My sources say no.' , 'Outlook not so good.'      , 'Very doubtful.'     ,
+               'Wouldn\'t you want to know, weather boy?',
+               'Can\'t say for sure, yet...',
+               'Depends.', 'Perhaps.', 'Maybe.', 'No.']
 
     if(None != question): # check for at least 1 argument
         await context.send(f'{context.author.mention} Helix Fossil says: {ehelix} *{random.choice(replies)}* {ehelix}')
@@ -260,11 +261,11 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
     source = source.upper()
     target = target.upper()
 
-    with open('./res/currencies.json', 'r') as storedCurr: # load list of currencies
-        availableCurr = json.load(storedCurr)
-
     if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
         await currency.retrieve_currencies(currconv)
+
+    with open('./res/currencies.json', 'r') as storedCurr: # load list of currencies
+        availableCurr = json.load(storedCurr)
 
     if(source not in availableCurr) or \
       (target not in availableCurr):
