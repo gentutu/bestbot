@@ -1,4 +1,4 @@
-########################################################################################################################
+/hl########################################################################################################################
 # INCLUDES
 ########################################################################################################################
 import os
@@ -179,7 +179,8 @@ async def helix(context, *, question = None):
                'Yes.'                    , 'Signs point to yes.', 'Reply hazy, try again.'    , 'Ask again later.'   ,
                'Better not tell you now.', 'Cannot predict now.', 'Concentrate and ask again.', 'Don\'t count on it.',
                'My reply is no.'         ,  'My sources say no.', 'Outlook not so good.'      , 'Very doubtful.'     ,
-               'Wouldn\'t you want to know, weather boy?']
+               'Wouldn\'t you want to know, weather boy?', 'No, fuck you.', 'Perhaps.',       'Maybe.',  
+               'Can\'t say for sure yet...', 'No.']
 
     if(None != question): # check for at least 1 argument
         await context.send(f'{context.author.mention} Helix Fossil says: {ehelix} *{random.choice(replies)}* {ehelix}')
