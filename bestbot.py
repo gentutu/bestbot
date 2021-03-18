@@ -26,53 +26,68 @@ colours = {
 }
 
 files = {
-    'f_blist'    : 'res/blist',
-    'f_btoken'   : 'res/btoken',
-    'f_cadmin'   : 'res/cadmin',
-    'f_croles'   : 'res/croles',
-    'f_ehelix'   : 'res/ehelix',
-    'f_currconv' : 'res/currconv'
+    'f_blacklist'    : 'res/blacklist',
+    'f_botToken'     : 'res/botToken',
+    'f_channelAdmin' : 'res/channelAdmin',
+    'f_cosmeticRoles': 'res/cosmeticRoles',
+    'f_emoteHelix'   : 'res/emoteHelix',
+    'f_currencyCache': 'res/currencyCache',
+    'f_helixReplies' : 'res/helixReplies'
 }
 
-if os.path.exists(files["f_blist"]):
-    with open(files["f_blist"], 'r') as blacklist:
-        global blist
-        blist = blacklist.read().split()
+if os.path.exists(files["f_blacklist"]):
+    with open(files["f_blacklist"], 'r') as blacklistFile:
+        global blacklist
+        blacklist = blacklistFile.read().split()
 else:
-    print(f'Error: {files["f_blist"]} file missing')
+    print(f'Error: {files["f_blacklist"]} file missing')
     exit()
 
-if os.path.exists(files["f_btoken"]):
-    btoken = open(files["f_btoken"], 'r').read().strip('\n')
+if os.path.exists(files["f_botToken"]):
+    with open(files["f_botToken"], 'r') as botTokenFile:
+        botToken = botTokenFile.read().strip('\n')
 else:
-    print(f'Error: {files["f_btoken"]} file missing')
+    print(f'Error: {files["f_botToken"]} file missing')
     exit()
 
-if os.path.exists(files["f_cadmin"]):
-    cadmin = open(files["f_cadmin"], 'r').read().strip('\n')
+if os.path.exists(files["f_channelAdmin"]):
+    with open(files["f_channelAdmin"], 'r') as channelAdminFile:
+        channelAdmin = channelAdminFile.read().strip('\n')
 else:
-    print(f'Error: {files["f_cadmin"]} file missing')
+    print(f'Error: {files["f_channelAdmin"]} file missing')
     exit()
 
-if os.path.exists(files["f_croles"]):
-    with open(files["f_croles"], 'r') as cosmeticRoles:
-        global croles
-        croles = cosmeticRoles.read().split()
+if os.path.exists(files["f_cosmeticRoles"]):
+    with open(files["f_cosmeticRoles"], 'r') as cosmeticRolesFile:
+        global cosmeticRoles
+        cosmeticRoles = cosmeticRolesFile.read().split('\n')
+        cosmeticRoles = [element for element in cosmeticRoles if element]
 else:
-    print(f'Error: {files["f_croles"]} file missing')
+    print(f'Error: {files["f_cosmeticRoles"]} file missing')
     exit()
 
-if os.path.exists(files["f_ehelix"]):
-    ehelix = open(files["f_ehelix"], 'r').read().strip('\n')
+if os.path.exists(files["f_emoteHelix"]):
+    with open(files["f_emoteHelix"], 'r') as emoteHelixFile:
+        emoteHelix = emoteHelixFile.read().strip('\n')
 else:
-    print(f'Error: {files["f_ehelix"]} file missing')
+    print(f'Error: {files["f_emoteHelix"]} file missing')
     exit()
 
-if os.path.exists(files["f_currconv"]):
+if os.path.exists(files["f_currencyCache"]):
     import currency
-    currconv = open(files["f_currconv"], 'r').read().strip('\n') # https://www.currencyconverterapi.com/
+    with open(files["f_currencyCache"], 'r') as currencyCacheFile:
+        currencyCache = currencyCacheFile.read().strip('\n') # https://www.currencyconverterapi.com/
 else:
-    currconv = None
+    currencyCache = None
+
+if os.path.exists(files["f_helixReplies"]):
+    with open(files["f_helixReplies"], 'r') as helixRepliesFile:
+        global helixReplies
+        helixReplies = open(files["f_helixReplies"], 'r').read().split('\n')
+        helixReplies = [element for element in helixReplies if element]
+else:
+    print(f'Error: {files["f_helixReplies"]} file missing')
+    exit()
 
 @client.event
 async def on_ready():
@@ -93,7 +108,7 @@ async def ip(context, noarg = None):
         await context.send(f'{context.author.mention} {errorReply}.')
         return
 
-    if(int(cadmin) == context.channel.id):
+    if(int(channelAdmin) == context.channel.id):
         ip = get('https://api.ipify.org').text
         embed = discord.Embed(title = "Host WAN IP", description = f'||`{ip}`||', color = colours["red"])
         await context.send(embed = embed)
@@ -174,19 +189,10 @@ async def coin(context, *, terms = None):
                 description = 'Consult the Helix Fossil. It shall answer.',
                 aliases = ['fossil'])
 async def helix(context, *, question = None):
-    replies = ['It is certain.'          , 'It is decidedly so.', 'Without a doubt.'          , 'Yes – definitely.'  ,
-               'You may rely on it.'     , 'As I see it, yes.'  , 'Most likely.'              , 'Outlook good.'      ,
-               'Yes.'                    , 'Signs point to yes.', 'Reply hazy, try again.'    , 'Ask again later.'   ,
-               'Better not tell you now.', 'Cannot predict now.', 'Concentrate and ask again.', 'Don\'t count on it.',
-               'My reply is no.'         , 'My sources say no.' , 'Outlook not so good.'      , 'Very doubtful.'     ,
-               'Wouldn\'t you want to know, weather boy?',
-               'Can\'t say for sure, yet...',
-               'Depends.', 'Perhaps.', 'Maybe.', 'No.']
-
     if(None != question): # check for at least 1 argument
-        await context.send(f'{context.author.mention} Helix Fossil says: {ehelix} *{random.choice(replies)}* {ehelix}')
+        await context.send(f'{context.author.mention} Helix Fossil says: {emoteHelix} *{random.choice(helixReplies)}* {emoteHelix}')
     else:
-        await context.send(f'{context.author.mention} Consult the Fossil. {ehelix}')
+        await context.send(f'{context.author.mention} Consult the Fossil. {emoteHelix}')
 
 @client.command(brief       = 'Performs a web search', ############################################################ find
                 description = 'Search a lot of places. Too many to list here. See the source code.')
@@ -228,10 +234,10 @@ async def role(context, role = None, noarg = None):
         return
 
     if('list' == role):
-        await context.send(f'{context.author.mention} Available roles: {croles}.')
+        await context.send(f'{context.author.mention} Available roles: {cosmeticRoles}.')
         return
 
-    if(role in croles):
+    if(role in cosmeticRoles):
         role = discord.utils.get(member.guild.roles, name = role)
         if(role in member.roles):
             await discord.Member.remove_roles(member, role)
@@ -263,7 +269,7 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
     target = target.upper()
 
     if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
-        await currency.retrieve_currencies(currconv)
+        await currency.retrieve_currencies(currencyCache)
 
     with open('./res/currencies.json', 'r') as storedCurr: # load list of currencies
         availableCurr = json.load(storedCurr)
@@ -277,7 +283,7 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
         await context.send(f'{context.author.mention} Nothing to convert.')
         return
 
-    exchanged = await currency.currency_convert(currconv, amount, source, target)
+    exchanged = await currency.currency_convert(currencyCache, amount, source, target)
     await context.send(f'{context.author.mention} {amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
 
 
@@ -286,15 +292,16 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
 ########################################################################################################################
 @client.event ################################################################################################ blacklist
 async def on_message(message):
-    for word in blist:
-        if word in message.content.lower():
+    for word in blacklist:
+        currentMessage = message.content.lower()
+        if word in currentMessage.replace(" ", ""):
             await message.delete()
     await client.process_commands(message)
 
 ########################################################################################################################
 # RUN
 ########################################################################################################################
-client.run(btoken)
+client.run(botToken)
 
 ########################################################################################################################
 # END OF FILE
