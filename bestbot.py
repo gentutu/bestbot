@@ -39,12 +39,14 @@ if os.path.exists(files["f_blacklist"]):
     with open(files["f_blacklist"], 'r') as blacklistFile:
         global blacklist
         blacklist = blacklistFile.read().split()
+        blacklist = [element for element in blacklist if element]
 else:
     print(f'Error: {files["f_blacklist"]} file missing')
     exit()
 
 if os.path.exists(files["f_botToken"]):
     with open(files["f_botToken"], 'r') as botTokenFile:
+        global botToken
         botToken = botTokenFile.read().strip('\n')
 else:
     print(f'Error: {files["f_botToken"]} file missing')
@@ -52,6 +54,7 @@ else:
 
 if os.path.exists(files["f_channelAdmin"]):
     with open(files["f_channelAdmin"], 'r') as channelAdminFile:
+        global channelAdmin
         channelAdmin = channelAdminFile.read().strip('\n')
 else:
     print(f'Error: {files["f_channelAdmin"]} file missing')
@@ -68,6 +71,7 @@ else:
 
 if os.path.exists(files["f_emoteHelix"]):
     with open(files["f_emoteHelix"], 'r') as emoteHelixFile:
+        global emoteHelix
         emoteHelix = emoteHelixFile.read().strip('\n')
 else:
     print(f'Error: {files["f_emoteHelix"]} file missing')
@@ -76,6 +80,7 @@ else:
 if os.path.exists(files["f_currencyCache"]):
     import currency
     with open(files["f_currencyCache"], 'r') as currencyCacheFile:
+        global currencyCache
         currencyCache = currencyCacheFile.read().strip('\n') # https://www.currencyconverterapi.com/
 else:
     currencyCache = None
