@@ -156,16 +156,19 @@ async def source(context, noarg = None):
         await context.send(f'{context.author.mention} {errorReply}.')
 
 @client.command(brief       = 'Checks bot status and network quality', ############################################ ping
-                description = 'Check  bot status and network quality.')
+                description = 'Check  bot status and network quality.',
+                aliases     = ['pong'])
 async def ping(context, noarg = None):
     if(None == noarg): # check for no arguments
-        await context.send(f'pong! `{round(client.latency * 1000)}ms`')
+        if('pong' == context.invoked_with):
+            await context.send(f':dagger:')
+        else:
+            await context.send(f'pong! `{round(client.latency * 1000)}ms`')
     else:
         await context.send(f'{context.author.mention} {errorReply}.')
 
 @client.command(brief       = 'Rolls for a random number up to a maximum', ######################################## roll
-                description = 'Rolls for a random number up to a maximum.',
-                aliases     = ['dice'])
+                description = 'Rolls for a random number up to a maximum.')
 async def roll(context, maximum = None, *, terms = None):
     try: # check for correct argument type
         maximum = int(maximum)
@@ -191,8 +194,7 @@ async def coin(context, *, terms = None):
         await context.send(f'{context.author.mention} tossed **{random.choice(sides)}** for *{terms}*.')
 
 @client.command(brief       = 'Consult the Helix Fossil', ######################################################## helix
-                description = 'Consult the Helix Fossil. It shall answer.',
-                aliases = ['fossil'])
+                description = 'Consult the Helix Fossil. It shall answer.')
 async def helix(context, *, question = None):
     if(None != question): # check for at least 1 argument
         await context.send(f'{context.author.mention} Helix Fossil says: {emoteHelix} *{random.choice(helixReplies)}* {emoteHelix}')
