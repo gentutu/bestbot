@@ -305,6 +305,14 @@ async def on_message(message):
             await message.delete()
     await client.process_commands(message)
 
+@client.event ################################################################################################ blacklist
+async def on_message_edit(before, after):
+    for word in blacklist:
+        currentMessage = after.content.lower()
+        if word in currentMessage.replace(" ", ""):
+            await after.delete()
+    await client.process_commands(after)
+
 ########################################################################################################################
 # RUN
 ########################################################################################################################
