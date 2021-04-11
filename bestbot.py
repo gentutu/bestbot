@@ -299,11 +299,14 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
 ########################################################################################################################
 @client.event ################################################################################################ blacklist
 async def on_message(message):
+    allowed = True
     for word in blacklist:
         currentMessage = message.content.lower()
         if word in currentMessage.replace(" ", ""):
             await message.delete()
-    await client.process_commands(message)
+            allowed = False
+    if(True == allowed):
+        await client.process_commands(message)
 
 @client.event ################################################################################################ blacklist
 async def on_message_edit(before, after):
