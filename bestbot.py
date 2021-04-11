@@ -97,7 +97,7 @@ else:
 @client.event
 async def on_ready():
     print('Bestbot online.')
-    await client.change_presence(status = discord.Status.online, activity = discord.Game('with admin powers'))
+    await client.change_presence(status = discord.Status.online)
 
 ########################################################################################################################
 # MODERATION
@@ -248,10 +248,10 @@ async def role(context, role = None, noarg = None):
         role = discord.utils.get(member.guild.roles, name = role)
         if(role in member.roles):
             await discord.Member.remove_roles(member, role)
-            await context.send(f'{context.author.mention} Removed role.')
+            await context.send(f'{context.author.mention} Removed `{role}` role.')
         else:
             await discord.Member.add_roles(member, role)
-            await context.send(f'{context.author.mention} Added role.')
+            await context.send(f'{context.author.mention} Added `{role}` role.')
     elif(None == role):
         await context.send(f'{context.author.mention} {errorReply}.')
     else:
