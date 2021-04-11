@@ -311,7 +311,6 @@ async def on_message_edit(before, after):
         currentMessage = after.content.lower()
         if word in currentMessage.replace(" ", ""):
             await after.delete()
-    await client.process_commands(after)
 
 ########################################################################################################################
 # RUN
