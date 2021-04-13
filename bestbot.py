@@ -143,8 +143,8 @@ async def clear(context, amount = None, confirm = None, noarg = None):
     except Exception:
         await context.send(f'{context.author.mention} {errorReply}.')
 
-@client.command(brief       = 'Sets the channel\'s slow mode', ########################################## clear
-                description = '[admin/mod] Sets the channel\'s slow mode. Use `off` or a valid duration (eg. `1m`)')
+@client.command(brief       = 'Sets the channel\'s slow mode', #################################################### slow
+                description = '[admin/mod] Sets the channel\'s slow mode. Use `off` or a valid duration (e.g. `1m`).')
 async def slow(context, amount = None, *, reason = None):
     if(True != context.author.guild_permissions.manage_messages): # check for user permissions
         await context.send(f'{context.author.mention} Permission denied.')
