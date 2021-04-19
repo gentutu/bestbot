@@ -240,30 +240,34 @@ async def helix(context, *, question = None):
 @client.command(brief       = 'Performs a web search', ############################################################ find
                 description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
-    if(  'google' == engine): header = 'https://www.google.com/search?q='
-    elif('yt'     == engine): header = 'https://www.youtube.com/results?search_query='
-    elif('ddg'    == engine): header = 'https://duckduckgo.com/?q='
-    elif('bing'   == engine): header = 'https://www.bing.com/search?q='
-    elif('sp'     == engine): header = 'https://startpage.com/do/search?q='
-    elif('wiki'   == engine): header = 'https://en.wikipedia.org/wiki/Search?search='
-    elif('reddit' == engine): header = 'https://www.reddit.com/search/?q='
-    elif('gh'     == engine): header = 'https://github.com/search?q='
-    elif('aw'     == engine): header = 'https://wiki.archlinux.org/index.php?search='
-    elif('gw'     == engine): header = 'https://wiki.gentoo.org/index.php?search='
-    elif('pcgw'   == engine): header = 'https://www.pcgamingwiki.com/w/index.php?search='
-    elif('wdb'    == engine): header = 'https://www.winehq.org/search?q='
-    elif('pdb'    == engine): header = 'https://www.protondb.com/search?q='
-    elif('ud'     == engine): header = 'https://www.urbandictionary.com/define.php?term='
-    elif('mcw'    == engine): header = 'https://minecraft.gamepedia.com/Special:Search?search='
-    elif('ph'     == engine):
+    switch = {
+    'google' : 'https://www.google.com/search?q=',
+    'yt'     : 'https://www.youtube.com/results?search_query=',
+    'ddg'    : 'https://duckduckgo.com/?q=',
+    'bing'   : 'https://www.bing.com/search?q=',
+    'sp'     : 'https://startpage.com/do/search?q=',
+    'wiki'   : 'https://en.wikipedia.org/wiki/Search?search=',
+    'reddit' : 'https://www.reddit.com/search/?q=',
+    'gh'     : 'https://github.com/search?q=',
+    'aw'     : 'https://wiki.archlinux.org/index.php?search=',
+    'gw'     : 'https://wiki.gentoo.org/index.php?search=',
+    'pcgw'   : 'https://www.pcgamingwiki.com/w/index.php?search=',
+    'wdb'    : 'https://www.winehq.org/search?q=',
+    'pdb'    : 'https://www.protondb.com/search?q=',
+    'ud'     : 'https://www.urbandictionary.com/define.php?term=',
+    'mcw'    : 'https://minecraft.gamepedia.com/Special:Search?search='
+    }
+
+    if (engine == 'ph'): # check for ph
         await context.send(f'{context.author.mention} No.')
         return
-    else:
+
+    if not (engine in switch): # check if the requested engine exists
         await context.send(f'{context.author.mention} Unknown search engine.')
         return
 
     if(None != query): # check for at least 1 search term
-        searchInput = header + urllib.parse.quote(query)
+        searchInput = switch[engine] + urllib.parse.quote(query)
         await context.send(f'{context.author.mention} Your search results: <{searchInput}>')
     else:
         await context.send(f'{context.author.mention} What should I search for?')
