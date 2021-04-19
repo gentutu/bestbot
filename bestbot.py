@@ -25,6 +25,24 @@ colours = {
     'blue'  : 0x224466
 }
 
+searchEngines = {
+    'google' : 'https://www.google.com/search?q=',
+    'yt'     : 'https://www.youtube.com/results?search_query=',
+    'ddg'    : 'https://duckduckgo.com/?q=',
+    'bing'   : 'https://www.bing.com/search?q=',
+    'sp'     : 'https://startpage.com/do/search?q=',
+    'wiki'   : 'https://en.wikipedia.org/wiki/Search?search=',
+    'reddit' : 'https://www.reddit.com/search/?q=',
+    'gh'     : 'https://github.com/search?q=',
+    'aw'     : 'https://wiki.archlinux.org/index.php?search=',
+    'gw'     : 'https://wiki.gentoo.org/index.php?search=',
+    'pcgw'   : 'https://www.pcgamingwiki.com/w/index.php?search=',
+    'wdb'    : 'https://www.winehq.org/search?q=',
+    'pdb'    : 'https://www.protondb.com/search?q=',
+    'ud'     : 'https://www.urbandictionary.com/define.php?term=',
+    'mcw'    : 'https://minecraft.gamepedia.com/Special:Search?search='
+}
+
 files = {
     'f_blacklist'    : 'res/blacklist',
     'f_botToken'     : 'res/botToken',
@@ -216,7 +234,7 @@ async def roll(context, maximum = None, *, terms = None):
         else:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} {errorReply}`.')
+        await context.send(f'{context.author.mention} {errorReply}.')
 
 @client.command(brief       = 'Tosses a coin', #################################################################### coin
                 description = 'Tosses a coin. Accepts terms freely.',
@@ -240,34 +258,16 @@ async def helix(context, *, question = None):
 @client.command(brief       = 'Performs a web search', ############################################################ find
                 description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
-    switch = {
-    'google' : 'https://www.google.com/search?q=',
-    'yt'     : 'https://www.youtube.com/results?search_query=',
-    'ddg'    : 'https://duckduckgo.com/?q=',
-    'bing'   : 'https://www.bing.com/search?q=',
-    'sp'     : 'https://startpage.com/do/search?q=',
-    'wiki'   : 'https://en.wikipedia.org/wiki/Search?search=',
-    'reddit' : 'https://www.reddit.com/search/?q=',
-    'gh'     : 'https://github.com/search?q=',
-    'aw'     : 'https://wiki.archlinux.org/index.php?search=',
-    'gw'     : 'https://wiki.gentoo.org/index.php?search=',
-    'pcgw'   : 'https://www.pcgamingwiki.com/w/index.php?search=',
-    'wdb'    : 'https://www.winehq.org/search?q=',
-    'pdb'    : 'https://www.protondb.com/search?q=',
-    'ud'     : 'https://www.urbandictionary.com/define.php?term=',
-    'mcw'    : 'https://minecraft.gamepedia.com/Special:Search?search='
-    }
-
-    if (engine == 'ph'): # check for ph
+    if ('ph' == engine):
         await context.send(f'{context.author.mention} No.')
         return
 
-    if not (engine in switch): # check if the requested engine exists
+    if not (engine in searchEngines): # check if the requested engine exists
         await context.send(f'{context.author.mention} Unknown search engine.')
         return
 
     if(None != query): # check for at least 1 search term
-        searchInput = switch[engine] + urllib.parse.quote(query)
+        searchInput = searchEngines[engine] + urllib.parse.quote(query)
         await context.send(f'{context.author.mention} Your search results: <{searchInput}>')
     else:
         await context.send(f'{context.author.mention} What should I search for?')
