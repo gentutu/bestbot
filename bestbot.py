@@ -2,6 +2,7 @@
 # INCLUDES
 ########################################################################################################################
 import os
+from os import path        # for find
 import json                # for conv
 import discord
 from discord.ext import commands
@@ -259,7 +260,11 @@ async def helix(context, *, question = None):
                 description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
     if ('ph' == engine):
-        await context.send('https://media.discordapp.net/attachments/814794831645114378/834328552761196574/SmartSelect_20210409-183226.jpg')
+        if path.exists('res/no.jpg'):
+            picture = discord.File('res/no.jpg')
+            await context.send(file=picture)
+        else:
+            await context.send(f'{context.author.mention} No.')
         return
 
     if not (engine in searchEngines): # check if the requested engine exists
