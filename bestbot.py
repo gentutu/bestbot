@@ -259,7 +259,7 @@ async def helix(context, *, question = None):
                 description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
     if ('ph' == engine):
-        await context.send(f'{context.author.mention} No.')
+        await context.send('https://media.discordapp.net/attachments/814794831645114378/834328552761196574/SmartSelect_20210409-183226.jpg')
         return
 
     if not (engine in searchEngines): # check if the requested engine exists
