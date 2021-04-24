@@ -133,15 +133,15 @@ async def on_ready():
 @client.command(brief       = 'Shows the host\'s WAN IP', ########################################################### ip
                 description = '[admin] Shows the host\'s WAN IP.')
 async def ip(context, noarg = None):
-    if(True != context.author.guild_permissions.administrator): # check for user permissions
+    if not context.author.guild_permissions.administrator: # check for user permissions
         await context.send(f'{context.author.mention} Permission denied.')
         return
 
-    if(None != noarg): # check for no arguments
+    if noarg is not None: # check for no arguments
         await context.send(f'{context.author.mention} {errorReply}.')
         return
 
-    if(int(channelAdmin) == context.channel.id):
+    if int(channelAdmin) == context.channel.id:
         ip = get('https://api.ipify.org').text
         embed = discord.Embed(title = "Host WAN IP", description = f'||`{ip}`||', color = colours["red"])
         await context.send(embed = embed)
@@ -151,16 +151,16 @@ async def ip(context, noarg = None):
 @client.command(brief       = 'Deletes a specified amount of messages', ########################################## clear
                 description = '[admin/mod] Deletes a specified amount of messages. Call with \'confirm\' argument.')
 async def clear(context, amount = None, confirm = None, noarg = None):
-    if(True != context.author.guild_permissions.manage_messages): # check for user permissions
+    if not context.author.guild_permissions.manage_messages: # check for user permissions
         await context.send(f'{context.author.mention} Permission denied.')
         return
 
     try: # check for correct argument type
-        if((None == noarg) and ('confirm' == confirm)): # check for no third argument
+        if noarg is not None and 'confirm' == confirm: # check for no third argument
             amount = int(amount)
-            if(1 > amount):
+            if 1 > amount:
                 raise Exception()
-            elif(1 == amount):
+            elif 1 == amount:
                 await context.channel.purge(limit = amount + 1)
                 await context.send(f'{context.author.mention} cleared the last message.')
             else:
@@ -174,7 +174,7 @@ async def clear(context, amount = None, confirm = None, noarg = None):
 @client.command(brief       = 'Sets the channel\'s slow mode', #################################################### slow
                 description = '[admin/mod] Sets the channel\'s slow mode. Use `off` or a valid duration (e.g. `1m`).')
 async def slow(context, amount = None, *, reason = None):
-    if(True != context.author.guild_permissions.manage_messages): # check for user permissions
+    if not context.author.guild_permissions.manage_messages: # check for user permissions
         await context.send(f'{context.author.mention} Permission denied.')
         return
 
@@ -195,12 +195,12 @@ async def slow(context, amount = None, *, reason = None):
         '6h' : 21600
     }
 
-    if(amount in duration):
+    if amount in duration:
         await context.channel.edit(reason = '/slow command', slowmode_delay = int(duration[amount]))
-        if('off' == amount):
+        if 'off' == amount:
             await context.send(f'{context.author.mention} disabled slow mode.')
         else:
-            if(None == reason):
+            if reason is None:
                 await context.send(f'{context.author.mention} enabled {amount} slow mode.')
             else:
                 await context.send(f'{context.author.mention} enabled {amount} slow mode with reason `{reason}`.')
@@ -213,7 +213,7 @@ async def slow(context, amount = None, *, reason = None):
 @client.command(brief       = 'Links towards the bot\'s source code', ########################################### source
                 description = 'Links towards the bot\'s source code.')
 async def source(context, noarg = None):
-    if(None == noarg): # check for no arguments
+    if noarg is None: # check for no arguments
         embed = discord.Embed(title = "Best Source", description = f"<{ghlink}>", color = colours["red"])
         await context.send(embed = embed)
     else:
@@ -223,8 +223,8 @@ async def source(context, noarg = None):
                 description = 'Check  bot status and network quality.',
                 aliases     = ['pong'])
 async def ping(context, noarg = None):
-    if(None == noarg): # check for no arguments
-        if('pong' == context.invoked_with):
+    if noarg is None: # check for no arguments
+        if 'pong' == context.invoked_with:
             await context.send(f':dagger:')
         else:
             await context.send(f'pong! `{round(client.latency * 1000)}ms`')
@@ -236,8 +236,8 @@ async def ping(context, noarg = None):
 async def roll(context, maximum = None, *, terms = None):
     try: # check for correct argument type
         maximum = int(maximum)
-        if(1 < maximum):
-            if(None == terms):
+        if 1 < maximum:
+            if terms is None:
                 await context.send(f'{context.author.mention} rolled {randint(1, maximum)}.')
             else:
                 await context.send(f'{context.author.mention} rolled {randint(1, maximum)} for *{terms}*.')
@@ -252,7 +252,7 @@ async def roll(context, maximum = None, *, terms = None):
 async def coin(context, *, terms = None):
     sides = ['heads', 'tails']
 
-    if(None == terms):
+    if terms is None:
         await context.send(f'{context.author.mention} tossed **{random.choice(sides)}**.')
     else:
         await context.send(f'{context.author.mention} tossed **{random.choice(sides)}** for *{terms}*.')
@@ -260,7 +260,7 @@ async def coin(context, *, terms = None):
 @client.command(brief       = 'Consult the Helix Fossil', ######################################################## helix
                 description = 'Consult the Helix Fossil. It shall answer.')
 async def helix(context, *, question = None):
-    if(None != question): # check for at least 1 argument
+    if question is not None: # check for at least 1 argument
         await context.send(f'{context.author.mention} Helix Fossil says: {emoteHelix} *{random.choice(helixReplies)}* {emoteHelix}')
     else:
         await context.send(f'{context.author.mention} Consult the Fossil. {emoteHelix}')
@@ -268,7 +268,7 @@ async def helix(context, *, question = None):
 @client.command(brief       = 'Performs a web search', ############################################################ find
                 description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
-    if ('ph' == engine):
+    if 'ph' == engine:
         if path.exists('res/no.jpg'):
             picture = discord.File('res/no.jpg')
             await context.send(file=picture)
@@ -280,7 +280,7 @@ async def find(context, engine = None, *, query = None):
         await context.send(f'{context.author.mention} Unknown search engine.')
         return
 
-    if(None != query): # check for at least 1 search term
+    if query is not None: # check for at least 1 search term
         searchInput = searchEngines[engine] + urllib.parse.quote(query)
         await context.send(f'{context.author.mention} Your search results: <{searchInput}>')
     else:
@@ -290,23 +290,23 @@ async def find(context, engine = None, *, query = None):
                 description = 'Toggles a role. List all options with the `list` argument.')
 async def role(context, role = None, noarg = None):
     member = context.author
-    if(None != noarg):
+    if noarg is not None:
         await context.send(f'{context.author.mention} {errorReply}.')
         return
 
-    if('list' == role):
+    if 'list' == role:
         await context.send(f'{context.author.mention} Available roles: {cosmeticRoles}.')
         return
 
-    if(role in cosmeticRoles):
+    if role in cosmeticRoles:
         role = discord.utils.get(member.guild.roles, name = role)
-        if(role in member.roles):
+        if role in member.roles:
             await discord.Member.remove_roles(member, role)
             await context.send(f'{context.author.mention} Removed `{role}` role.')
         else:
             await discord.Member.add_roles(member, role)
             await context.send(f'{context.author.mention} Added `{role}` role.')
-    elif(None == role):
+    elif role is None:
         await context.send(f'{context.author.mention} {errorReply}.')
     else:
         await context.send(f'{context.author.mention} Unsupported role.')
@@ -317,10 +317,10 @@ async def role(context, role = None, noarg = None):
 async def conv(context, amount = None, source = None, target = None, noarg = None):
     try: # check for int amount
         amount = float(amount)
-        if((None != noarg)  or \
-           (None == source) or \
-           (None == target) or \
-           (None == amount)):
+        if noarg is not None  or \
+           source is None or \
+           target is None or \
+           amount is None:
             raise Exception()
     except Exception:
         await context.send(f'{context.author.mention} {errorReply}.')
@@ -335,8 +335,8 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
     with open('./res/currencies.json', 'r') as storedCurr: # load list of currencies
         availableCurr = json.load(storedCurr)
 
-    if(source not in availableCurr) or \
-      (target not in availableCurr):
+    if source not in availableCurr or \
+      target not in availableCurr:
         await context.send(f'{context.author.mention} Unknown currency code.')
         return
 
@@ -351,17 +351,17 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
                 description = 'Sends a random cat photo or gif. Use `pic`, `vid` or none (for random) as the type.')
 async def cat(context, type = None, noarg = None):
     try:
-        if(None != noarg):
+        if noarg is not None:
             raise Exception()
     except Exception:
         await context.send(f'{context.author.mention} {errorReply}.')
         return
 
-    if('pic' == type):
+    if 'pic' == type:
         catURL = await meow.get(catCache, 'png')
-    elif('vid' == type):
+    elif 'vid' == type:
         catURL = await meow.get(catCache, 'gif')
-    elif(None == type):
+    elif type is None:
         catURL = await meow.get(catCache, random.choice(['png', 'gif']))
     else:
         await context.send(f'{context.author.mention} {errorReply}.')
@@ -380,7 +380,7 @@ async def on_message(message):
         if word in currentMessage.replace(" ", ""):
             await message.delete()
             allowed = False
-    if(True == allowed):
+    if allowed:
         await client.process_commands(message)
 
 @client.event ################################################################################################ blacklist
