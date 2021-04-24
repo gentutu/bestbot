@@ -11,7 +11,6 @@ import random              # for helix
 from random import randint # for roll
 from requests import get   # for ip
 import urllib              # for find
-from urllib import request # for find
 
 ########################################################################################################################
 # SETUP
@@ -289,25 +288,25 @@ async def find(context, engine = None, *, query = None):
 
 @client.command(brief       = 'Toggles a role', ################################################################### role
                 description = 'Toggles a role. List all options with the `list` argument.')
-async def role(context, role = None, noarg = None):
+async def role(context, role_arg = None, noarg = None):
     member = context.author
     if noarg is not None:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
-    if role == 'list':
+    if role_arg == 'list':
         await context.send(f'{context.author.mention} Available roles: {COSMETIC_ROLES}.')
         return
 
-    if role in COSMETIC_ROLES:
-        role = discord.utils.get(member.guild.roles, name = role)
-        if role in member.roles:
-            await discord.Member.remove_roles(member, role)
-            await context.send(f'{context.author.mention} Removed `{role}` role.')
+    if role_arg in COSMETIC_ROLES:
+        role_arg = discord.utils.get(member.guild.roles, name = role_arg)
+        if role_arg in member.roles:
+            await discord.Member.remove_roles(member, role_arg)
+            await context.send(f'{context.author.mention} Removed `{role_arg}` role.')
         else:
-            await discord.Member.add_roles(member, role)
-            await context.send(f'{context.author.mention} Added `{role}` role.')
-    elif role is None:
+            await discord.Member.add_roles(member, role_arg)
+            await context.send(f'{context.author.mention} Added `{role_arg}` role.')
+    elif role_arg is None:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
     else:
         await context.send(f'{context.author.mention} Unsupported role.')
@@ -315,20 +314,20 @@ async def role(context, role = None, noarg = None):
 
 @client.command(brief       = 'Converts currency', ################################################################ conv
                 description = 'Converts currency. Use the 3-letter currency codes.')
-async def conv(context, amount = None, source = None, target = None, noarg = None):
+async def conv(context, amount = None, source_curr = None, target_curr = None, noarg = None):
     try: # check for int amount
         amount = float(amount)
         if noarg is not None  or \
-           source is None or \
-           target is None or \
+           source_curr is None or \
+           target_curr is None or \
            amount is None:
             raise Exception()
     except Exception:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
-    source = source.upper()
-    target = target.upper()
+    source_curr = source_curr.upper()
+    target_curr = target_curr.upper()
 
     if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
         await currency.retrieve_currencies(CURRENCY_CACHE)
@@ -336,21 +335,21 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
     with open('./res/currencies.json', 'r') as stored_curr: # load list of currencies
         available_curr = json.load(stored_curr)
 
-    if source not in available_curr or \
-      target not in available_curr:
+    if source_curr not in available_curr or \
+      target_curr not in available_curr:
         await context.send(f'{context.author.mention} Unknown currency code.')
         return
 
-    if source == target:
+    if source_curr == target_curr:
         await context.send(f'{context.author.mention} Nothing to convert.')
         return
 
-    exchanged = await currency.currency_convert(CURRENCY_CACHE, amount, source, target)
-    await context.send(f'{context.author.mention} {amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
+    exchanged = await currency.currency_convert(CURRENCY_CACHE, amount, source_curr, target_curr)
+    await context.send(f'{context.author.mention} {amount:.2f} `{source_curr}` ≈ `{target_curr}` {exchanged:.2f}')
 
 @client.command(brief       = 'Sends a random cat photo or gif', ################################################### cat
                 description = 'Sends a random cat photo or gif. Use `pic`, `vid` or none (for random) as the type.')
-async def cat(context, type = None, noarg = None):
+async def cat(context, filetype = None, noarg = None):
     try:
         if noarg is not None:
             raise Exception()
@@ -358,11 +357,11 @@ async def cat(context, type = None, noarg = None):
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
-    if type == 'pic':
+    if filetype == 'pic':
         cat_url = await meow.get(CAT_CACHE, 'png')
-    elif type == 'vid':
+    elif filetype == 'vid':
         cat_url = await meow.get(CAT_CACHE, 'gif')
-    elif type is None:
+    elif filetype is None:
         cat_url = await meow.get(CAT_CACHE, random.choice(['png', 'gif']))
     else:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
@@ -385,7 +384,7 @@ async def on_message(message):
         await client.process_commands(message)
 
 @client.event ################################################################################################ blacklist
-async def on_message_edit(before, after):
+async def on_message_edit(_, after):
     for word in BLACKLIST:
         current_message = after.content.lower()
         if word in current_message.replace(" ", ""):
