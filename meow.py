@@ -6,14 +6,14 @@ import aiohttp
 ########################################################################################################################
 # API
 ########################################################################################################################
-async def send(api_key, mime_type):
+async def get(apiKey, mimeType):
     headers = {
-        'x-api-key' : api_key,
-        'Content-Type' : 'application/json'
-}
+        'x-api-key'   : apiKey,
+        'Content-Type': 'application/json'
+        }
     params = {
-        'mime_types' : mime_type
-}
+        'mime_types': mimeType
+        }
 
     async with aiohttp.ClientSession() as session:
         async with session.get('https://api.thecatapi.com/v1/images/search', headers=headers, params=params) as response:

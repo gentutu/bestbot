@@ -106,10 +106,10 @@ else:
     currencyCache = None
 
 if os.path.exists(files["f_catCache"]):
-    import cat
+    import meow
     with open(files["f_catCache"], 'r') as catCacheFile:
         global catCache
-        catCache = catCacheFile.read().strip('\n') # https://www.catconverterapi.com/
+        catCache = catCacheFile.read().strip('\n') # https://thecatapi.com/
 else:
     catCache = None
 
@@ -248,7 +248,7 @@ async def roll(context, maximum = None, *, terms = None):
 
 @client.command(brief       = 'Tosses a coin', #################################################################### coin
                 description = 'Tosses a coin. Accepts terms freely.',
-                aliases     = ['toss'])
+                aliases     = ['toss', 'flip'])
 async def coin(context, *, terms = None):
     sides = ['heads', 'tails']
 
@@ -347,20 +347,27 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
     exchanged = await currency.currency_convert(currencyCache, amount, source, target)
     await context.send(f'{context.author.mention} {amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
 
-@client.command(brief       = 'Sends a random cat photo or a gif', ################################################ meow
-                description = 'Sends a random cat jpg or a gif depending on the mime_type argument')
-async def meow(context, mime_type = None, noarg = None):
+@client.command(brief       = 'Sends a random cat photo or gif', ################################################### cat
+                description = 'Sends a random cat photo or gif. Use `pic`, `vid` or none (for random) as the type.')
+async def cat(context, type = None, noarg = None):
     try:
-        if((None != noarg) or \
-           (None == mime_type)):
+        if(None != noarg):
             raise Exception()
     except Exception:
         await context.send(f'{context.author.mention} {errorReply}.')
         return
 
-    cat_url = await cat.send(catCache, mime_type)
+    if('pic' == type):
+        catURL = await meow.get(catCache, 'png')
+    elif('vid' == type):
+        catURL = await meow.get(catCache, 'gif')
+    elif(None == type):
+        catURL = await meow.get(catCache, random.choice(['png', 'gif']))
+    else:
+        await context.send(f'{context.author.mention} {errorReply}.')
+        return
 
-    await context.send(f'{cat_url}')
+    await context.send(f'{catURL}')
 
 ########################################################################################################################
 # EVENTS
