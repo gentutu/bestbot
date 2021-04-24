@@ -2,6 +2,7 @@
 # INCLUDES
 ########################################################################################################################
 import os
+import sys
 from os import path        # for find
 import json                # for conv
 import discord
@@ -62,7 +63,7 @@ if os.path.exists(files["f_blacklist"]):
         BLACKLIST = [element for element in BLACKLIST if element]
 else:
     print(f'Error: {files["f_blacklist"]} file missing')
-    exit()
+    sys.exit()
 
 if os.path.exists(files["f_botToken"]):
     with open(files["f_botToken"], 'r') as botTokenFile:
@@ -70,7 +71,7 @@ if os.path.exists(files["f_botToken"]):
         BOT_TOKEN = botTokenFile.read().strip('\n')
 else:
     print(f'Error: {files["f_botToken"]} file missing')
-    exit()
+    sys.exit()
 
 if os.path.exists(files["f_channelAdmin"]):
     with open(files["f_channelAdmin"], 'r') as channelAdminFile:
@@ -78,16 +79,16 @@ if os.path.exists(files["f_channelAdmin"]):
         CHANNEL_ADMIN = channelAdminFile.read().strip('\n')
 else:
     print(f'Error: {files["f_channelAdmin"]} file missing')
-    exit()
+    sys.exit()
 
 if os.path.exists(files["f_cosmeticRoles"]):
     with open(files["f_cosmeticRoles"], 'r') as cosmeticRolesFile:
         global COSMETIC_ROLES
         COSMETIC_ROLES = cosmeticRolesFile.read().split('\n')
-        COSMETIC_ROLES = [element for element in cosmeticRoles if element]
+        COSMETIC_ROLES = [element for element in COSMETIC_ROLES if element]
 else:
     print(f'Error: {files["f_cosmeticRoles"]} file missing')
-    exit()
+    sys.exit()
 
 if os.path.exists(files["f_emoteHelix"]):
     with open(files["f_emoteHelix"], 'r') as emoteHelixFile:
@@ -95,7 +96,7 @@ if os.path.exists(files["f_emoteHelix"]):
         EMOTE_HELIX = emoteHelixFile.read().strip('\n')
 else:
     print(f'Error: {files["f_emoteHelix"]} file missing')
-    exit()
+    sys.exit()
 
 if os.path.exists(files["f_currencyCache"]):
     import currency
@@ -120,7 +121,7 @@ if os.path.exists(files["f_helixReplies"]):
         HELIX_REPLIES = [element for element in HELIX_REPLIES if element]
 else:
     print(f'Error: {files["f_helixReplies"]} file missing')
-    exit()
+    sys.exit()
 
 @client.event
 async def on_ready():
@@ -142,8 +143,8 @@ async def ip(context, noarg = None):
         return
 
     if int(CHANNEL_ADMIN) == context.channel.id:
-        ip = get('https://api.ipify.org').text
-        embed = discord.Embed(title = "Host WAN IP", description = f'||`{ip}`||', color = colours["red"])
+        host_wan_ip = get('https://api.ipify.org').text
+        embed = discord.Embed(title = "Host WAN IP", description = f'||`{host_wan_ip}`||', color = colours["red"])
         await context.send(embed = embed)
     else:
         await context.send(f'{context.author.mention} Command not available on current channel.')
@@ -160,7 +161,7 @@ async def clear(context, amount = None, confirm = None, noarg = None):
             amount = int(amount)
             if amount < 1:
                 raise Exception()
-            elif amount == 1:
+            if amount == 1:
                 await context.channel.purge(limit = amount + 1)
                 await context.send(f'{context.author.mention} cleared the last message.')
             else:
@@ -225,7 +226,7 @@ async def source(context, noarg = None):
 async def ping(context, noarg = None):
     if noarg is None: # check for no arguments
         if context.invoked_with == 'pong':
-            await context.send(f':dagger:')
+            await context.send(':dagger:')
         else:
             await context.send(f'pong! `{round(client.latency * 1000)}ms`')
     else:
@@ -281,8 +282,8 @@ async def find(context, engine = None, *, query = None):
         return
 
     if query is not None: # check for at least 1 search term
-        searchInput = searchEngines[engine] + urllib.parse.quote(query)
-        await context.send(f'{context.author.mention} Your search results: <{searchInput}>')
+        search_input = searchEngines[engine] + urllib.parse.quote(query)
+        await context.send(f'{context.author.mention} Your search results: <{search_input}>')
     else:
         await context.send(f'{context.author.mention} What should I search for?')
 
@@ -332,11 +333,11 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
     if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
         await currency.retrieve_currencies(CURRENCY_CACHE)
 
-    with open('./res/currencies.json', 'r') as storedCurr: # load list of currencies
-        availableCurr = json.load(storedCurr)
+    with open('./res/currencies.json', 'r') as stored_curr: # load list of currencies
+        available_curr = json.load(stored_curr)
 
-    if source not in availableCurr or \
-      target not in availableCurr:
+    if source not in available_curr or \
+      target not in available_curr:
         await context.send(f'{context.author.mention} Unknown currency code.')
         return
 
@@ -358,16 +359,16 @@ async def cat(context, type = None, noarg = None):
         return
 
     if type == 'pic':
-        catURL = await meow.get(CAT_CACHE, 'png')
+        cat_url = await meow.get(CAT_CACHE, 'png')
     elif type == 'vid':
-        catURL = await meow.get(CAT_CACHE, 'gif')
+        cat_url = await meow.get(CAT_CACHE, 'gif')
     elif type is None:
-        catURL = await meow.get(CAT_CACHE, random.choice(['png', 'gif']))
+        cat_url = await meow.get(CAT_CACHE, random.choice(['png', 'gif']))
     else:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
-    await context.send(f'{catURL}')
+    await context.send(f'{cat_url}')
 
 ########################################################################################################################
 # EVENTS
@@ -376,8 +377,8 @@ async def cat(context, type = None, noarg = None):
 async def on_message(message):
     allowed = True
     for word in BLACKLIST:
-        currentMessage = message.content.lower()
-        if word in currentMessage.replace(" ", ""):
+        current_message = message.content.lower()
+        if word in current_message.replace(" ", ""):
             await message.delete()
             allowed = False
     if allowed:
@@ -386,8 +387,8 @@ async def on_message(message):
 @client.event ################################################################################################ blacklist
 async def on_message_edit(before, after):
     for word in BLACKLIST:
-        currentMessage = after.content.lower()
-        if word in currentMessage.replace(" ", ""):
+        current_message = after.content.lower()
+        if word in current_message.replace(" ", ""):
             await after.delete()
 
 ########################################################################################################################
