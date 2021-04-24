@@ -50,6 +50,7 @@ files = {
     'f_cosmeticRoles': 'res/cosmeticRoles',
     'f_emoteHelix'   : 'res/emoteHelix',
     'f_currencyCache': 'res/currencyCache',
+    'f_catCache'     : 'res/catCache',
     'f_helixReplies' : 'res/helixReplies'
 }
 
@@ -102,6 +103,14 @@ if os.path.exists(files["f_currencyCache"]):
         currencyCache = currencyCacheFile.read().strip('\n') # https://www.currencyconverterapi.com/
 else:
     currencyCache = None
+
+if os.path.exists(files["f_catCache"]):
+    import cat
+    with open(files["f_catCache"], 'r') as catCacheFile:
+        global catCache
+        catCache = catCacheFile.read().strip('\n') # https://www.catconverterapi.com/
+else:
+    catCache = None
 
 if os.path.exists(files["f_helixReplies"]):
     with open(files["f_helixReplies"], 'r') as helixRepliesFile:
@@ -333,6 +342,20 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
     exchanged = await currency.currency_convert(currencyCache, amount, source, target)
     await context.send(f'{context.author.mention} {amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
 
+@client.command(brief       = 'Sends a random cat photo or a gif', ################################################ meow
+                description = 'Sends a random cat jpg or a gif depending on the mime_type argument')
+async def meow(context, mime_type = None, noarg = None):
+    try:
+        if((None != noarg) or \
+           (None == mime_type)):
+            raise Exception()
+    except Exception:
+        await context.send(f'{context.author.mention} {errorReply}.')
+        return
+
+    cat_url = await cat.send(catCache, mime_type)
+
+    await context.send(f'{cat_url}')
 
 ########################################################################################################################
 # EVENTS
