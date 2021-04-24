@@ -156,11 +156,11 @@ async def clear(context, amount = None, confirm = None, noarg = None):
         return
 
     try: # check for correct argument type
-        if noarg is not None and 'confirm' == confirm: # check for no third argument
+        if noarg is not None and confirm == 'confirm': # check for no third argument
             amount = int(amount)
-            if 1 > amount:
+            if amount < 1:
                 raise Exception()
-            elif 1 == amount:
+            elif amount == 1:
                 await context.channel.purge(limit = amount + 1)
                 await context.send(f'{context.author.mention} cleared the last message.')
             else:
@@ -197,7 +197,7 @@ async def slow(context, amount = None, *, reason = None):
 
     if amount in duration:
         await context.channel.edit(reason = '/slow command', slowmode_delay = int(duration[amount]))
-        if 'off' == amount:
+        if amount == 'off':
             await context.send(f'{context.author.mention} disabled slow mode.')
         else:
             if reason is None:
@@ -224,7 +224,7 @@ async def source(context, noarg = None):
                 aliases     = ['pong'])
 async def ping(context, noarg = None):
     if noarg is None: # check for no arguments
-        if 'pong' == context.invoked_with:
+        if context.invoked_with == 'pong':
             await context.send(f':dagger:')
         else:
             await context.send(f'pong! `{round(client.latency * 1000)}ms`')
@@ -236,7 +236,7 @@ async def ping(context, noarg = None):
 async def roll(context, maximum = None, *, terms = None):
     try: # check for correct argument type
         maximum = int(maximum)
-        if 1 < maximum:
+        if maximum > 1:
             if terms is None:
                 await context.send(f'{context.author.mention} rolled {randint(1, maximum)}.')
             else:
@@ -268,7 +268,7 @@ async def helix(context, *, question = None):
 @client.command(brief       = 'Performs a web search', ############################################################ find
                 description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
-    if 'ph' == engine:
+    if engine == 'ph':
         if path.exists('res/no.jpg'):
             picture = discord.File('res/no.jpg')
             await context.send(file=picture)
@@ -276,7 +276,7 @@ async def find(context, engine = None, *, query = None):
             await context.send(f'{context.author.mention} No.')
         return
 
-    if not (engine in searchEngines): # check if the requested engine exists
+    if engine not in searchEngines: # check if the requested engine exists
         await context.send(f'{context.author.mention} Unknown search engine.')
         return
 
@@ -294,7 +294,7 @@ async def role(context, role = None, noarg = None):
         await context.send(f'{context.author.mention} {errorReply}.')
         return
 
-    if 'list' == role:
+    if role == 'list':
         await context.send(f'{context.author.mention} Available roles: {cosmeticRoles}.')
         return
 
@@ -340,7 +340,7 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
         await context.send(f'{context.author.mention} Unknown currency code.')
         return
 
-    if(source == target):
+    if source == target:
         await context.send(f'{context.author.mention} Nothing to convert.')
         return
 
@@ -357,9 +357,9 @@ async def cat(context, type = None, noarg = None):
         await context.send(f'{context.author.mention} {errorReply}.')
         return
 
-    if 'pic' == type:
+    if type == 'pic':
         catURL = await meow.get(catCache, 'png')
-    elif 'vid' == type:
+    elif type == 'vid':
         catURL = await meow.get(catCache, 'gif')
     elif type is None:
         catURL = await meow.get(catCache, random.choice(['png', 'gif']))
