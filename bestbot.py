@@ -5,12 +5,12 @@ import os
 import sys
 from os import path        # for find
 import json                # for conv
-import discord
-from discord.ext import commands
 import random              # for helix
 from random import randint # for roll
-from requests import get   # for ip
 import urllib              # for find
+from requests import get   # for ip
+import discord
+from discord.ext import commands
 
 ########################################################################################################################
 # SETUP
