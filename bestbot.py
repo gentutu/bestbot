@@ -17,8 +17,8 @@ from urllib import request # for find
 ########################################################################################################################
 client = commands.Bot(command_prefix = '/')
 
-ghlink     = 'https://github.com/gentutu/bestbot'
-errorReply = 'Incorrect command usage; see `/help [command]`'
+GH_LINK     = 'https://github.com/gentutu/bestbot'
+ERROR_REPLY = 'Incorrect command usage; see `/help [command]`'
 
 colours = {
     'red'   : 0xAA2222,
@@ -57,42 +57,42 @@ files = {
 
 if os.path.exists(files["f_blacklist"]):
     with open(files["f_blacklist"], 'r') as blacklistFile:
-        global blacklist
-        blacklist = blacklistFile.read().split()
-        blacklist = [element for element in blacklist if element]
+        global BLACKLIST
+        BLACKLIST = blacklistFile.read().split()
+        BLACKLIST = [element for element in BLACKLIST if element]
 else:
     print(f'Error: {files["f_blacklist"]} file missing')
     exit()
 
 if os.path.exists(files["f_botToken"]):
     with open(files["f_botToken"], 'r') as botTokenFile:
-        global botToken
-        botToken = botTokenFile.read().strip('\n')
+        global BOT_TOKEN
+        BOT_TOKEN = botTokenFile.read().strip('\n')
 else:
     print(f'Error: {files["f_botToken"]} file missing')
     exit()
 
 if os.path.exists(files["f_channelAdmin"]):
     with open(files["f_channelAdmin"], 'r') as channelAdminFile:
-        global channelAdmin
-        channelAdmin = channelAdminFile.read().strip('\n')
+        global CHANNEL_ADMIN
+        CHANNEL_ADMIN = channelAdminFile.read().strip('\n')
 else:
     print(f'Error: {files["f_channelAdmin"]} file missing')
     exit()
 
 if os.path.exists(files["f_cosmeticRoles"]):
     with open(files["f_cosmeticRoles"], 'r') as cosmeticRolesFile:
-        global cosmeticRoles
-        cosmeticRoles = cosmeticRolesFile.read().split('\n')
-        cosmeticRoles = [element for element in cosmeticRoles if element]
+        global COSMETIC_ROLES
+        COSMETIC_ROLES = cosmeticRolesFile.read().split('\n')
+        COSMETIC_ROLES = [element for element in cosmeticRoles if element]
 else:
     print(f'Error: {files["f_cosmeticRoles"]} file missing')
     exit()
 
 if os.path.exists(files["f_emoteHelix"]):
     with open(files["f_emoteHelix"], 'r') as emoteHelixFile:
-        global emoteHelix
-        emoteHelix = emoteHelixFile.read().strip('\n')
+        global EMOTE_HELIX
+        EMOTE_HELIX = emoteHelixFile.read().strip('\n')
 else:
     print(f'Error: {files["f_emoteHelix"]} file missing')
     exit()
@@ -100,24 +100,24 @@ else:
 if os.path.exists(files["f_currencyCache"]):
     import currency
     with open(files["f_currencyCache"], 'r') as currencyCacheFile:
-        global currencyCache
-        currencyCache = currencyCacheFile.read().strip('\n') # https://www.currencyconverterapi.com/
+        global CURRENCY_CACHE
+        CURRENCY_CACHE = currencyCacheFile.read().strip('\n') # https://www.currencyconverterapi.com/
 else:
-    currencyCache = None
+    CURRENCY_CACHE = None
 
 if os.path.exists(files["f_catCache"]):
     import meow
     with open(files["f_catCache"], 'r') as catCacheFile:
-        global catCache
-        catCache = catCacheFile.read().strip('\n') # https://thecatapi.com/
+        global CAT_CACHE
+        CAT_CACHE = catCacheFile.read().strip('\n') # https://thecatapi.com/
 else:
-    catCache = None
+    CAT_CACHE = None
 
 if os.path.exists(files["f_helixReplies"]):
     with open(files["f_helixReplies"], 'r') as helixRepliesFile:
-        global helixReplies
-        helixReplies = open(files["f_helixReplies"], 'r').read().split('\n')
-        helixReplies = [element for element in helixReplies if element]
+        global HELIX_REPLIES
+        HELIX_REPLIES = open(files["f_helixReplies"], 'r').read().split('\n')
+        HELIX_REPLIES = [element for element in HELIX_REPLIES if element]
 else:
     print(f'Error: {files["f_helixReplies"]} file missing')
     exit()
@@ -138,10 +138,10 @@ async def ip(context, noarg = None):
         return
 
     if noarg is not None: # check for no arguments
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
-    if int(channelAdmin) == context.channel.id:
+    if int(CHANNEL_ADMIN) == context.channel.id:
         ip = get('https://api.ipify.org').text
         embed = discord.Embed(title = "Host WAN IP", description = f'||`{ip}`||', color = colours["red"])
         await context.send(embed = embed)
@@ -169,7 +169,7 @@ async def clear(context, amount = None, confirm = None, noarg = None):
         else:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
 
 @client.command(brief       = 'Sets the channel\'s slow mode', #################################################### slow
                 description = '[admin/mod] Sets the channel\'s slow mode. Use `off` or a valid duration (e.g. `1m`).')
@@ -205,7 +205,7 @@ async def slow(context, amount = None, *, reason = None):
             else:
                 await context.send(f'{context.author.mention} enabled {amount} slow mode with reason `{reason}`.')
     else:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
 
 ########################################################################################################################
 # UTILITIES
@@ -214,10 +214,10 @@ async def slow(context, amount = None, *, reason = None):
                 description = 'Links towards the bot\'s source code.')
 async def source(context, noarg = None):
     if noarg is None: # check for no arguments
-        embed = discord.Embed(title = "Best Source", description = f"<{ghlink}>", color = colours["red"])
+        embed = discord.Embed(title = "Best Source", description = f"<{GH_LINK}>", color = colours["red"])
         await context.send(embed = embed)
     else:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
 
 @client.command(brief       = 'Checks bot status and network quality', ############################################ ping
                 description = 'Check  bot status and network quality.',
@@ -229,7 +229,7 @@ async def ping(context, noarg = None):
         else:
             await context.send(f'pong! `{round(client.latency * 1000)}ms`')
     else:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
 
 @client.command(brief       = 'Rolls for a random number up to a maximum', ######################################## roll
                 description = 'Rolls for a random number up to a maximum.')
@@ -244,7 +244,7 @@ async def roll(context, maximum = None, *, terms = None):
         else:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
 
 @client.command(brief       = 'Tosses a coin', #################################################################### coin
                 description = 'Tosses a coin. Accepts terms freely.',
@@ -261,9 +261,9 @@ async def coin(context, *, terms = None):
                 description = 'Consult the Helix Fossil. It shall answer.')
 async def helix(context, *, question = None):
     if question is not None: # check for at least 1 argument
-        await context.send(f'{context.author.mention} Helix Fossil says: {emoteHelix} *{random.choice(helixReplies)}* {emoteHelix}')
+        await context.send(f'{context.author.mention} Helix Fossil says: {EMOTE_HELIX} *{random.choice(HELIX_REPLIES)}* {EMOTE_HELIX}')
     else:
-        await context.send(f'{context.author.mention} Consult the Fossil. {emoteHelix}')
+        await context.send(f'{context.author.mention} Consult the Fossil. {EMOTE_HELIX}')
 
 @client.command(brief       = 'Performs a web search', ############################################################ find
                 description = 'Search a lot of places. Too many to list here. See the source code.')
@@ -291,14 +291,14 @@ async def find(context, engine = None, *, query = None):
 async def role(context, role = None, noarg = None):
     member = context.author
     if noarg is not None:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
     if role == 'list':
-        await context.send(f'{context.author.mention} Available roles: {cosmeticRoles}.')
+        await context.send(f'{context.author.mention} Available roles: {COSMETIC_ROLES}.')
         return
 
-    if role in cosmeticRoles:
+    if role in COSMETIC_ROLES:
         role = discord.utils.get(member.guild.roles, name = role)
         if role in member.roles:
             await discord.Member.remove_roles(member, role)
@@ -307,7 +307,7 @@ async def role(context, role = None, noarg = None):
             await discord.Member.add_roles(member, role)
             await context.send(f'{context.author.mention} Added `{role}` role.')
     elif role is None:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
     else:
         await context.send(f'{context.author.mention} Unsupported role.')
 
@@ -323,14 +323,14 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
            amount is None:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
     source = source.upper()
     target = target.upper()
 
     if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
-        await currency.retrieve_currencies(currencyCache)
+        await currency.retrieve_currencies(CURRENCY_CACHE)
 
     with open('./res/currencies.json', 'r') as storedCurr: # load list of currencies
         availableCurr = json.load(storedCurr)
@@ -344,7 +344,7 @@ async def conv(context, amount = None, source = None, target = None, noarg = Non
         await context.send(f'{context.author.mention} Nothing to convert.')
         return
 
-    exchanged = await currency.currency_convert(currencyCache, amount, source, target)
+    exchanged = await currency.currency_convert(CURRENCY_CACHE, amount, source, target)
     await context.send(f'{context.author.mention} {amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
 
 @client.command(brief       = 'Sends a random cat photo or gif', ################################################### cat
@@ -354,17 +354,17 @@ async def cat(context, type = None, noarg = None):
         if noarg is not None:
             raise Exception()
     except Exception:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
     if type == 'pic':
-        catURL = await meow.get(catCache, 'png')
+        catURL = await meow.get(CAT_CACHE, 'png')
     elif type == 'vid':
-        catURL = await meow.get(catCache, 'gif')
+        catURL = await meow.get(CAT_CACHE, 'gif')
     elif type is None:
-        catURL = await meow.get(catCache, random.choice(['png', 'gif']))
+        catURL = await meow.get(CAT_CACHE, random.choice(['png', 'gif']))
     else:
-        await context.send(f'{context.author.mention} {errorReply}.')
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
     await context.send(f'{catURL}')
@@ -375,7 +375,7 @@ async def cat(context, type = None, noarg = None):
 @client.event ################################################################################################ blacklist
 async def on_message(message):
     allowed = True
-    for word in blacklist:
+    for word in BLACKLIST:
         currentMessage = message.content.lower()
         if word in currentMessage.replace(" ", ""):
             await message.delete()
@@ -385,7 +385,7 @@ async def on_message(message):
 
 @client.event ################################################################################################ blacklist
 async def on_message_edit(before, after):
-    for word in blacklist:
+    for word in BLACKLIST:
         currentMessage = after.content.lower()
         if word in currentMessage.replace(" ", ""):
             await after.delete()
@@ -393,7 +393,7 @@ async def on_message_edit(before, after):
 ########################################################################################################################
 # RUN
 ########################################################################################################################
-client.run(botToken)
+client.run(BOT_TOKEN)
 
 ########################################################################################################################
 # END OF FILE
