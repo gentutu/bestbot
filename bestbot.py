@@ -156,11 +156,11 @@ async def clear(context, amount = None, confirm = None, noarg = None):
         return
 
     try: # check for correct argument type
-        if noarg is not None and confirm == 'confirm': # check for no third argument
+        if noarg is None and confirm == 'confirm': # check for no third argument
             amount = int(amount)
             if amount < 1:
                 raise Exception()
-            if amount == 1:
+            elif amount == 1:
                 await context.channel.purge(limit = amount + 1)
                 await context.send(f'{context.author.mention} cleared the last message.')
             else:
@@ -311,16 +311,15 @@ async def role(context, role_arg = None, noarg = None):
     else:
         await context.send(f'{context.author.mention} Unsupported role.')
 
-
 @client.command(brief       = 'Converts currency', ################################################################ conv
                 description = 'Converts currency. Use the 3-letter currency codes.')
 async def conv(context, amount = None, source_curr = None, target_curr = None, noarg = None):
     try: # check for int amount
         amount = float(amount)
-        if noarg is not None  or \
-           source_curr is None or \
-           target_curr is None or \
-           amount is None:
+        if noarg       is not None or \
+           source_curr is     None or \
+           target_curr is     None or \
+           amount      is     None:
             raise Exception()
     except Exception:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
