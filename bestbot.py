@@ -211,7 +211,8 @@ async def slow(context, amount = None, *, reason = None):
 # UTILITIES
 ########################################################################################################################
 @client.command(brief       = 'Links towards the bot\'s source code', ########################################### source
-                description = 'Links towards the bot\'s source code.')
+                description = 'Links towards the bot\'s source code.',
+                aliases     = ['saucecode', 'sauce'])
 async def source(context, noarg = None):
     if noarg is None: # check for no arguments
         embed = discord.Embed(title = "Best Source", description = f"<{GH_LINK}>", color = colours["red"])
