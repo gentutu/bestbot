@@ -25,6 +25,7 @@ Simple Discord bot with basic functionality
 
 ### Credits
 * https://www.currencyconverterapi.com/ for the currency conversion API
+* https://thecatapi.com/ for the cat picture API
 
 ---
 ### License
