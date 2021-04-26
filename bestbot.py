@@ -358,11 +358,11 @@ async def cat(context, filetype = None, noarg = None):
         return
 
     if filetype == 'pic':
-        cat_url = await meow.get(CAT_CACHE, 'png')
+        cat_url = await meow.get(CAT_CACHE, 'jpg')
     elif filetype == 'vid':
         cat_url = await meow.get(CAT_CACHE, 'gif')
     elif filetype is None:
-        cat_url = await meow.get(CAT_CACHE, random.choice(['png', 'gif']))
+        cat_url = await meow.get(CAT_CACHE, random.choice(['jpg', 'gif']))
     else:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
