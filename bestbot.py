@@ -50,8 +50,8 @@ files = {
     'f_channelAdmin' : 'res/channelAdmin',
     'f_cosmeticRoles': 'res/cosmeticRoles',
     'f_emoteHelix'   : 'res/emoteHelix',
-    'f_currencyCache': 'res/currencyCache',
-    'f_catCache'     : 'res/catCache',
+    'f_currencyKey'  : 'res/currencyKey',
+    'f_catKey'       : 'res/catKey',
     'f_helixReplies' : 'res/helixReplies'
 }
 
@@ -97,21 +97,21 @@ else:
     print(f'Error: {files["f_emoteHelix"]} file missing')
     sys.exit()
 
-if os.path.exists(files["f_currencyCache"]):
+if os.path.exists(files["f_currencyKey"]):
     import currency
-    with open(files["f_currencyCache"], 'r') as currencyCacheFile:
-        global CURRENCY_CACHE
-        CURRENCY_CACHE = currencyCacheFile.read().strip('\n') # https://www.currencyconverterapi.com/
+    with open(files["f_currencyKey"], 'r') as currencyKeyFile:
+        global CURRENCY_KEY
+        CURRENCY_KEY = currencyKeyFile.read().strip('\n') # https://www.currencyconverterapi.com/
 else:
-    CURRENCY_CACHE = None
+    CURRENCY_KEY = None
 
-if os.path.exists(files["f_catCache"]):
-    import meow
-    with open(files["f_catCache"], 'r') as catCacheFile:
-        global CAT_CACHE
-        CAT_CACHE = catCacheFile.read().strip('\n') # https://thecatapi.com/
+if os.path.exists(files["f_catKey"]):
+    import cat
+    with open(files["f_catKey"], 'r') as catKeyFile:
+        global CAT_KEY
+        CAT_KEY = catKeyFile.read().strip('\n') # https://thecatapi.com/ or https://thedogapi.com/
 else:
-    CAT_CACHE = None
+    CAT_KEY = None
 
 if os.path.exists(files["f_helixReplies"]):
     with open(files["f_helixReplies"], 'r') as helixRepliesFile:
@@ -330,7 +330,7 @@ async def conv(context, amount = None, source_curr = None, target_curr = None, n
     target_curr = target_curr.upper()
 
     if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
-        await currency.retrieve_currencies(CURRENCY_CACHE)
+        await currency.retrieve_currencies(CURRENCY_KEY)
 
     with open('./res/currencies.json', 'r') as stored_curr: # load list of currencies
         available_curr = json.load(stored_curr)
@@ -344,13 +344,12 @@ async def conv(context, amount = None, source_curr = None, target_curr = None, n
         await context.send(f'{context.author.mention} Nothing to convert.')
         return
 
-    exchanged = await currency.currency_convert(CURRENCY_CACHE, amount, source_curr, target_curr)
+    exchanged = await currency.currency_convert(CURRENCY_KEY, amount, source_curr, target_curr)
     await context.send(f'{context.author.mention} {amount:.2f} `{source_curr}` ≈ `{target_curr}` {exchanged:.2f}')
 
-@client.command(brief       = 'Sends a random cat photo or gif', ################################################### cat
-                description = 'Sends a random cat photo or gif. Use `pic`, `vid` or none (for random) as the type.',
-                aliases     = ['dog'])
-async def cat(context, filetype = None, noarg = None):
+@client.command(brief       = 'Sends a random animal picture', ##################################################### pls
+                description = 'Sends a random animal picture. Use `cat` or `dog` when requesting.')
+async def pls(context, animal = None, noarg = None):
     try:
         if noarg is not None:
             raise Exception()
@@ -358,17 +357,13 @@ async def cat(context, filetype = None, noarg = None):
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
         return
 
-    if filetype == 'pic':
-        cat_url = await meow.get(CAT_CACHE, 'jpg')
-    elif filetype == 'vid':
-        cat_url = await meow.get(CAT_CACHE, 'gif')
-    elif filetype is None:
-        cat_url = await meow.get(CAT_CACHE, random.choice(['jpg', 'gif']))
+    supported_animals = ['cat', 'dog']
+
+    if(animal in supported_animals):
+        URL = await cat.get(animal, CAT_KEY, random.choice(['jpg', 'gif']))
+        await context.send(f'{URL}')
     else:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
-        return
-
-    await context.send(f'{cat_url}')
 
 ########################################################################################################################
 # EVENTS
@@ -391,11 +386,12 @@ async def on_message_edit(_, after):
         if word in current_message.replace(" ", ""):
             await after.delete()
 
-@client.event ########################################################################################## unknown command
-async def on_command_error(context, error):
-    if isinstance(error, commands.CommandNotFound):
-        context.content = "/cat"
-        await client.process_commands(context)
+# dis: disabled for now
+#@client.event ######################################################################################### unknown command
+#async def on_command_error(context, error):
+#    if isinstance(error, commands.CommandNotFound):
+#        context.content = "/cat"
+#        await client.process_commands(context)
 
 ########################################################################################################################
 # RUN
