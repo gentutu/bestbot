@@ -12,8 +12,8 @@ Simple Discord bot with basic functionality
     * a `botToken` file with the bot's token (generated on Discord's developer portal)
     * a `channelAdmin` file with a text channel ID for `/ip`
     * a `cosmeticRoles` file with a list of cosmetic roles for `/role`
-    * a `currencyCache` file with the API key for `/conv` generated [here](https://www.currencyconverterapi.com/)
-    * a `catCache` file with the API key for `/cat` generated [here](https://thecatapi.com/)
+    * a `currencyKey` file with the API key for `/conv` generated [here](https://www.currencyconverterapi.com/)
+    * a `catKey` file with the API key for `/pls` generated [here](https://thecatapi.com/) or [here](https://thedogapi.com/)
     * an `emoteHelix` file with the Helix emote for `/helix`
     * a `helixReplies` file with a list of replies for `/helix`
     * You will want to use your data as necessary and/or update the bot
@@ -26,6 +26,7 @@ Simple Discord bot with basic functionality
 ### Credits
 * https://www.currencyconverterapi.com/ for the currency conversion API
 * https://thecatapi.com/ for the cat picture API
+* https://thedogapi.com/ for the dog picture API
 
 ---
 ### License
