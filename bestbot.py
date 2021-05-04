@@ -391,6 +391,12 @@ async def on_message_edit(_, after):
         if word in current_message.replace(" ", ""):
             await after.delete()
 
+@client.event ########################################################################################## unknown command
+async def on_command_error(context, error):
+    if isinstance(error, commands.CommandNotFound):
+        context.content = "/cat"
+        await client.process_commands(context)
+
 ########################################################################################################################
 # RUN
 ########################################################################################################################
