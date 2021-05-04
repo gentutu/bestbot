@@ -348,7 +348,8 @@ async def conv(context, amount = None, source_curr = None, target_curr = None, n
     await context.send(f'{context.author.mention} {amount:.2f} `{source_curr}` ≈ `{target_curr}` {exchanged:.2f}')
 
 @client.command(brief       = 'Sends a random cat photo or gif', ################################################### cat
-                description = 'Sends a random cat photo or gif. Use `pic`, `vid` or none (for random) as the type.')
+                description = 'Sends a random cat photo or gif. Use `pic`, `vid` or none (for random) as the type.',
+                aliases     = ['dog'])
 async def cat(context, filetype = None, noarg = None):
     try:
         if noarg is not None:
