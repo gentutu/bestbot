@@ -396,7 +396,10 @@ async def on_message_delete(message):
     async for entry in message.guild.audit_logs(action=discord.AuditLogAction.message_delete):
         if entry.user.id == client.user.id:
             return # Do nothing if the message was deleted by the bot
-        deleted_by = entry.user
+            
+        if message.id == entry.target.id:
+            deleted_by = entry.user
+            break
         
     deleted_at = discord.utils.snowflake_time(message.id)
     deleted_at_string = time.strftime('%Y-%m-%d %H:%M', time.gmtime(deleted_at.timestamp()))
