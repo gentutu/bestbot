@@ -389,7 +389,7 @@ async def on_message_edit(_, after):
 
 @client.event ################################################################################################ echoes deleted messages
 async def on_message_delete(message):
-    ehcochannel = client.get_channel(851349291170660372)
+    echochannel = client.get_channel(851349291170660372)
     if message.author.id == client.user.id:
         return
     if message.attachments:
