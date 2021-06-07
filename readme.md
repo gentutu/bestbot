@@ -1,5 +1,5 @@
 ## Bestbot
-Simple Discord bot with basic functionality
+Simple Discord bot with basic(-ish) functionality
 
 ---
 ### Running
@@ -11,6 +11,7 @@ Simple Discord bot with basic functionality
     * a `blacklist` file containing a list of blacklisted words
     * a `botToken` file with the bot's token (generated on Discord's developer portal)
     * a `channelAdmin` file with a text channel ID for `/ip`
+    * a `channelEcho` file with a text channel ID for the deleted/edited message tracker
     * a `cosmeticRoles` file with a list of cosmetic roles for `/role`
     * a `currencyKey` file with the API key for `/conv` generated [here](https://www.currencyconverterapi.com/)
     * a `catKey` file with the API key for `/pls` generated [here](https://thecatapi.com/) or [here](https://thedogapi.com/)
