@@ -16,6 +16,7 @@ from discord.ext import commands
 # SETUP
 ########################################################################################################################
 client = commands.Bot(command_prefix = '/')
+client.sniped_messages = {}
 
 GH_LINK     = 'https://github.com/gentutu/bestbot'
 ERROR_REPLY = 'Incorrect command usage; see `/help [command]`'
@@ -386,6 +387,33 @@ async def on_message_edit(_, after):
         if word in current_message.replace(" ", ""):
             await after.delete()
 
+@client.event ################################################################################################ echoes deleted messages
+async def on_message_delete(message):
+    ehcochannel = client.get_channel(851349291170660372)
+    if message.author.id == client.user.id:
+        return
+    if message.attachments:
+        image = message.attachments[0]
+        client.sniped_messages[message.guild.id] = (image.proxy_url, message.content, message.author, message.channel.name, message.created_at)
+    else:
+        client.sniped_messages[message.guild.id] = (message.content,message.author, message.channel.name, message.created_at)
+    try:
+        image_proxy_url, contents,author, channel_name, time = client.sniped_messages[message.guild.id]
+    except:
+        contents,author, channel_name, time = client.sniped_messages[message.guild.id]
+    try:
+        embed = discord.Embed(description=contents , color=discord.Color.purple(), timestamp=time)
+        embed.set_image(url=image_proxy_url)
+        embed.set_author(name=f"{author.name}#{author.discriminator}", icon_url=author.avatar_url)
+        embed.set_footer(text=f"Deleted in : #{channel_name}")
+        await ehcochannel.send(embed=embed)
+    except:
+        embed = discord.Embed(description=contents , color=discord.Color.purple(), timestamp=time)
+        embed.set_author(name=f"{author.name}#{author.discriminator}", icon_url=author.avatar_url)
+        embed.set_footer(text=f"Deleted in : #{channel_name}")
+        await ehcochannel.send(embed=embed)
+    async for entry in message.guild.audit_logs(action=discord.AuditLogAction.message_delete):
+        action = discord.AuditLogAction.message_delete
 # dis: disabled for now
 #@client.event ######################################################################################### unknown command
 #async def on_command_error(context, error):
