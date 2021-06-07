@@ -3,6 +3,7 @@
 ########################################################################################################################
 import os
 import sys
+import time                # for strftime
 from os import path        # for find
 import json                # for conv
 import random              # for helix
@@ -385,6 +386,28 @@ async def on_message_edit(_, after):
         current_message = after.content.lower()
         if word in current_message.replace(" ", ""):
             await after.delete()
+
+@client.event ################################################################################################ message deletion echo
+async def on_message_delete(message):
+    # Do nothing if bot messages are deleted.
+    if message.author.id == client.user.id: return
+    
+    deleted_by = None
+    async for entry in message.guild.audit_logs(action=discord.AuditLogAction.message_delete):
+        if entry.user.id == client.user.id:
+            return # Do nothing if the message was deleted by the bot
+            
+        if message.id == entry.target.id:
+            deleted_by = entry.user
+            break
+        
+    deleted_at = discord.utils.snowflake_time(message.id)
+    deleted_at_string = time.strftime('%Y-%m-%d %H:%M', time.gmtime(deleted_at.timestamp()))
+    
+    if deleted_by:
+        await message.channel.send(f'Message deleted by {deleted_by.name}: <**{message.author.name}**> posted at {deleted_at_string}:\n> {message.content}')
+    else:
+        await message.channel.send(f'<**{message.author.name}**> deleted their message, posted at {deleted_at_string}:\n> {message.content}')
 
 # dis: disabled for now
 #@client.event ######################################################################################### unknown command
