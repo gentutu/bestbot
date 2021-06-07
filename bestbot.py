@@ -3,7 +3,6 @@
 ########################################################################################################################
 import os
 import sys
-import time                # for strftime
 from os import path        # for find
 import json                # for conv
 import random              # for helix
@@ -17,7 +16,7 @@ from discord.ext import commands
 # SETUP
 ########################################################################################################################
 client = commands.Bot(command_prefix = '/')
-client.sniped_messages = {}
+client.echoLog = {}
 
 GH_LINK     = 'https://github.com/gentutu/bestbot'
 ERROR_REPLY = 'Incorrect command usage; see `/help [command]`'
@@ -50,6 +49,7 @@ files = {
     'f_blacklist'    : 'res/blacklist',
     'f_botToken'     : 'res/botToken',
     'f_channelAdmin' : 'res/channelAdmin',
+    'f_channelEcho'  : 'res/channelEcho',
     'f_cosmeticRoles': 'res/cosmeticRoles',
     'f_emoteHelix'   : 'res/emoteHelix',
     'f_currencyKey'  : 'res/currencyKey',
@@ -80,6 +80,14 @@ if os.path.exists(files["f_channelAdmin"]):
         CHANNEL_ADMIN = channelAdminFile.read().strip('\n')
 else:
     print(f'Error: {files["f_channelAdmin"]} file missing')
+    sys.exit()
+
+if os.path.exists(files["f_channelEcho"]):
+    with open(files["f_channelEcho"], 'r') as channelEchoFile:
+        global CHANNEL_ECHO
+        CHANNEL_ECHO = channelEchoFile.read().strip('\n')
+else:
+    print(f'Error: {files["f_channelEcho"]} file missing')
     sys.exit()
 
 if os.path.exists(files["f_cosmeticRoles"]):
@@ -128,6 +136,41 @@ else:
 async def on_ready():
     print('Bestbot online.')
     await client.change_presence(status = discord.Status.online)
+
+########################################################################################################################
+# LOCAL API
+########################################################################################################################
+async def echoMessage(reason, message, colour):
+    echoChannel = client.get_channel(int(CHANNEL_ECHO))
+
+    if message.author.id == client.user.id:
+        return
+
+    if message.attachments:
+        image = message.attachments[0]
+        client.echoLog[message.guild.id] = (image.proxy_url, message.content, message.author, message.channel.name, message.created_at)
+    else:
+        client.echoLog[message.guild.id] = (message.content,message.author, message.channel.name, message.created_at)
+
+    try:
+        image_proxy_url, contents,author, channel_name, time = client.echoLog[message.guild.id]
+    except:
+        contents,author, channel_name, time = client.echoLog[message.guild.id]
+
+    try:
+        embed = discord.Embed(description = contents , color = colour, timestamp = time)
+        embed.set_image(url = image_proxy_url)
+        embed.set_author(name = f"{author.name}#{author.discriminator}", icon_url = author.avatar_url)
+        embed.set_footer(text = f"{reason} in #{channel_name}")
+        await echoChannel.send(embed = embed)
+    except:
+        embed = discord.Embed(description = contents , color = colour, timestamp = time)
+        embed.set_author(name = f"{author.name}#{author.discriminator}", icon_url = author.avatar_url)
+        embed.set_footer(text = f"{reason} in #{channel_name}")
+        await echoChannel.send(embed = embed)
+
+    async for entry in message.guild.audit_logs(action = discord.AuditLogAction.message_delete):
+        action = discord.AuditLogAction.message_delete
 
 ########################################################################################################################
 # MODERATION
@@ -382,40 +425,19 @@ async def on_message(message):
         await client.process_commands(message)
 
 @client.event ################################################################################################ blacklist
-async def on_message_edit(_, after):
+async def on_message_edit(before, after):
+    await echoMessage('Edited from', before, colours["green"])
+    await echoMessage('Edited to'  , after, colours["blue"])
+
     for word in BLACKLIST:
         current_message = after.content.lower()
         if word in current_message.replace(" ", ""):
             await after.delete()
 
-@client.event ################################################################################################ echoes deleted messages
+@client.event ############################################################################################# deleted echo
 async def on_message_delete(message):
-    echochannel = client.get_channel() # channel ID here
-    if message.author.id == client.user.id:
-        return
-    if message.attachments:
-        image = message.attachments[0]
-        client.sniped_messages[message.guild.id] = (image.proxy_url, message.content, message.author, message.channel.name, message.created_at)
-    else:
-        client.sniped_messages[message.guild.id] = (message.content,message.author, message.channel.name, message.created_at)
-    try:
-        image_proxy_url, contents,author, channel_name, time = client.sniped_messages[message.guild.id]
-    except:
-        contents,author, channel_name, time = client.sniped_messages[message.guild.id]
-    try:
-        embed = discord.Embed(description=contents , color=discord.Color.purple(), timestamp=time)
-        embed.set_image(url=image_proxy_url)
-        embed.set_author(name=f"{author.name}#{author.discriminator}", icon_url=author.avatar_url)
-        embed.set_footer(text=f"Deleted in : #{channel_name}")
-        await ehcochannel.send(embed=embed)
-    except:
-        embed = discord.Embed(description=contents , color=discord.Color.purple(), timestamp=time)
-        embed.set_author(name=f"{author.name}#{author.discriminator}", icon_url=author.avatar_url)
-        embed.set_footer(text=f"Deleted in : #{channel_name}")
-        await ehcochannel.send(embed=embed)
-    async for entry in message.guild.audit_logs(action=discord.AuditLogAction.message_delete):
-        action = discord.AuditLogAction.message_delete
-        
+    await echoMessage('Deleted', message, colours["red"])
+
 # dis: disabled for now
 #@client.event ######################################################################################### unknown command
 #async def on_command_error(context, error):
