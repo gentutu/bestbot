@@ -426,8 +426,11 @@ async def on_message(message):
 
 @client.event ################################################################################################ blacklist
 async def on_message_edit(before, after):
+    if before.content == after.content:
+        return
+
     await echoMessage('Edited from', before, colours["green"])
-    await echoMessage('Edited to'  , after, colours["blue"])
+    await echoMessage('Edited to'  , after,  colours["blue"])
 
     for word in BLACKLIST:
         current_message = after.content.lower()
