@@ -3,6 +3,7 @@
 ########################################################################################################################
 import os
 import sys
+import time                # for strftime
 from os import path        # for find
 import json                # for conv
 import random              # for helix
@@ -389,7 +390,7 @@ async def on_message_edit(_, after):
 
 @client.event ################################################################################################ echoes deleted messages
 async def on_message_delete(message):
-    echochannel = client.get_channel(851349291170660372)
+    echochannel = client.get_channel() # channel ID here
     if message.author.id == client.user.id:
         return
     if message.attachments:
@@ -414,6 +415,7 @@ async def on_message_delete(message):
         await ehcochannel.send(embed=embed)
     async for entry in message.guild.audit_logs(action=discord.AuditLogAction.message_delete):
         action = discord.AuditLogAction.message_delete
+        
 # dis: disabled for now
 #@client.event ######################################################################################### unknown command
 #async def on_command_error(context, error):
