@@ -314,6 +314,7 @@ async def helix(context, *, question = None):
 @client.command(brief       = 'Performs a web search', ############################################################ find
                 description = 'Search a lot of places. Too many to list here. See the source code.')
 async def find(context, engine = None, *, query = None):
+    engine = engine.lower()
     if engine == 'ph':
         if path.exists('res/no.jpg'):
             picture = discord.File('res/no.jpg')
