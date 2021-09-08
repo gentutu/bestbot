@@ -343,7 +343,7 @@ async def role(context, role_arg = None, noarg = None):
         return
 
     if role_arg == 'list':
-        await context.send(f'{context.author.mention} Available roles: {COSMETIC_ROLES}.')
+        await context.send(f'{context.author.mention} Available roles: {", ".join(COSMETIC_ROLES)}.')
         return
 
     if role_arg in COSMETIC_ROLES:
