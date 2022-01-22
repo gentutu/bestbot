@@ -43,7 +43,8 @@ searchEngines = {
     'wdb'    : 'https://www.winehq.org/search?q=',
     'pdb'    : 'https://www.protondb.com/search?q=',
     'ud'     : 'https://www.urbandictionary.com/define.php?term=',
-    'mcw'    : 'https://minecraft.gamepedia.com/Special:Search?search='
+    'mcw'    : 'https://minecraft.gamepedia.com/Special:Search?search=',
+    'cheat'  : 'https://cheat.sh/'
 }
 
 files = {
