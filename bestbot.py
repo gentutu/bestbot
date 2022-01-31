@@ -4,6 +4,7 @@
 import os
 import sys
 from datetime import date  # for blacklist
+import string              # for blacklist
 from os import path        # for find
 import json                # for conv
 import random              # for helix
@@ -420,14 +421,18 @@ async def pls(context, animal = None, noarg = None):
 async def on_message(message):
     allowed = True
     current_message = message.content.lower()
-    if date.today().weekday() != 2 and ":wednesday:" in current_message.replace(" ", ""):
+    current_message = current_message.replace(" ", "")
+    current_message = current_message.translate(str.maketrans('', '', string.punctuation))
+
+    if date.today().weekday() != 2 and ":wednesday:" in current_message:
         await message.delete()
         allowed = False
     else:
         for word in BLACKLIST:
-            if word in current_message.replace(" ", ""):
+            if word in current_message:
                 await message.delete()
                 allowed = False
+
     if allowed:
         await client.process_commands(message)
 
