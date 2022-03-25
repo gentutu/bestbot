@@ -440,7 +440,7 @@ async def addgame(context, gameName = None, gameCode = None, noarg = None):
     games[str(gameName)] = str(gameCode)
 
     with open(files["f_gameKeys"], "w") as gameKeyFile:
-        games = json.dump(games,gameKeyFile)
+        games = json.dump(games, gameKeyFile)
 
     await context.send(f"{context.author.mention} game added!")
     await context.channel.purge(limit=2)
