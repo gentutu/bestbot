@@ -17,6 +17,7 @@ Simple Discord bot with basic(-ish) functionality
     * a `catKey` file with the API key for `/pls` generated [here](https://thecatapi.com/) or [here](https://thedogapi.com/)
     * an `emoteHelix` file with the Helix emote for `/helix`
     * a `helixReplies` file with a list of replies for `/helix`
+    * a `gameKeys.json` file with a `{}` inside to store games and their activation codes for `/game` commands
     * You will want to use your data as necessary and/or update the bot
 * Run with `Python 3`
 * Use the bot with the `/` prefix; see `/help` once online (unless you already read the code)

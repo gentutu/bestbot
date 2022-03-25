@@ -6,7 +6,7 @@ import sys
 from datetime import date  # for blacklist
 import string              # for blacklist
 from os import path        # for find
-import json                # for conv
+import json                # for conv & game database
 import random              # for helix
 from random import randint # for roll
 import urllib              # for find
@@ -57,7 +57,8 @@ files = {
     'f_emoteHelix'   : 'res/emoteHelix',
     'f_currencyKey'  : 'res/currencyKey',
     'f_catKey'       : 'res/catKey',
-    'f_helixReplies' : 'res/helixReplies'
+    'f_helixReplies' : 'res/helixReplies',
+    'f_gameKeys'     : 'res/gameKeys.json'
 }
 
 if os.path.exists(files["f_blacklist"]):
@@ -135,6 +136,12 @@ else:
     print(f'Error: {files["f_helixReplies"]} file missing')
     sys.exit()
 
+if os.path.exists(files["f_gameKeys"]):
+    pass
+else:
+    print(f'Error: {files["f_gameKeys"]} file missing')
+    sys.exit()
+
 @client.event
 async def on_ready():
     print('Bestbot online.')
@@ -195,6 +202,7 @@ async def ip(context, noarg = None):
         await context.send(embed = embed)
     else:
         await context.send(f'{context.author.mention} Command not available on current channel.')
+
 
 @client.command(brief       = 'Deletes a specified amount of messages', ########################################## clear
                 description = '[admin/mod] Deletes a specified amount of messages. Call with \'confirm\' argument.')
@@ -413,6 +421,74 @@ async def pls(context, animal = None, noarg = None):
         await context.send(f'{URL}')
     else:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+
+@client.command(brief       = 'Allows a user to input a game with its activation code', ######################## addgame
+                description = 'Allows a user to input a game with its activation code. arg1 = gameName, arg2 = code.')
+async def addgame(context, gameName = None, gameCode = None, noarg = None):
+    try:
+        if noarg is not None or\
+            gameName is None or\
+            gameCode is None:
+                raise Exception()
+    except Exception:
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+        return
+    
+    with open(files["f_gameKeys"], "r") as gameKeyFile:
+        games = json.load(gameKeyFile)
+
+    games[str(gameName)] = str(gameCode)
+
+    with open(files["f_gameKeys"], "w") as gameKeyFile:
+        games = json.dump(games,gameKeyFile)
+
+    await context.send(f"{context.author.mention} game added!")
+    await context.channel.purge(limit=2)
+
+@client.command(brief       = 'Allows a user to claim a game', ################################################ claimgame
+                description = 'Allows a user to claim a game. The activation code is dm\'d to the user')  
+async def claimgame(context, gameName = None, noarg = None):
+    try:
+        if noarg is not None:
+            raise Exception()
+    except Exception:
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+        return
+
+    with open(files["f_gameKeys"], "r") as gameKeyFile:
+        games = json.load(gameKeyFile)
+
+    if str(gameName) in games:
+        await context.send(f'{context.author.mention} `{gameName}` found! dm\'ing your game code now!')
+        await context.author.send(f'key: {games[gameName]}')
+        
+        with open(files["f_gameKeys"], "r+") as gameKeyFile:
+            games = json.load(gameKeyFile)
+            games.pop(gameName)
+            global TEMP_GAMES
+            TEMP_GAMES = games
+
+        with open(files["f_gameKeys"], "w+") as gameKeyFile:
+            pass
+
+        with open(files["f_gameKeys"], "r+") as gameKeyFile:
+            TEMP_GAMES = json.dump(TEMP_GAMES, gameKeyFile)
+
+    else:
+        await context.send(f'{context.author.mention} `{gameName}` not found!')
+
+@client.command(brief       = 'Lists the games a user can claim', ################################################ listgame
+                description = 'Lists the games a user can claim.')
+async def listgames(context):
+    with open(files["f_gameKeys"], "r") as gameKeyFile:
+        games = json.load(gameKeyFile)
+
+        gameEmbed = discord.Embed(title="available games:")
+        
+        for game in games:
+            gameEmbed.add_field(name=f"{game}", value=f'type `/claimgame {game}` to claim!')
+
+        await context.send(embed=gameEmbed)
 
 ########################################################################################################################
 # EVENTS
