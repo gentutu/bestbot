@@ -3,16 +3,19 @@
 ########################################################################################################################
 import os
 import sys
-from datetime import date  # for blacklist
-import string              # for blacklist
-from os import path        # for find
-import json                # for conv
-import random              # for helix
-from random import randint # for roll
-import urllib              # for find
-from requests import get   # for ip
+from datetime import date               # for blacklist
+import string                           # for blacklist
+from os import path                     # for find
+import json                             # for conv
+import random                           # for helix
+from random import randint              # for roll
+import urllib                           # for find
+from requests import get                # for ip
+from datetime import datetime, timezone # for time
+from zoneinfo import ZoneInfo           # for time
 import discord
 from discord.ext import commands
+
 
 ########################################################################################################################
 # SETUP
@@ -413,6 +416,28 @@ async def pls(context, animal = None, noarg = None):
         await context.send(f'{URL}')
     else:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+
+@client.command(brief       = 'Show the time of a place', ##################################################### pls
+                description = 'Show the time of a place. Use standard timezone names.')
+async def time(context, place = None, noarg = None):
+    try:
+        if noarg is not None:
+            raise Exception()
+    except Exception:
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+        return
+
+    place = place.title()
+
+    try:
+        time = datetime.now(ZoneInfo(str(place)))
+    except:
+        tzLink = 'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'
+        await context.send(f'{context.author.mention} Incorrect timezone; see <{tzLink}>.')
+        return
+
+    time = time.strftime('%H:%M')
+    await context.send(f'{context.author.mention} It\'s `{time}` in {place}.')
 
 ########################################################################################################################
 # EVENTS
