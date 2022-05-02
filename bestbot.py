@@ -265,8 +265,12 @@ async def topic(context, *, newTopic = None):
         await context.send(f'{context.author.mention} Permission denied.')
         return
 
+    if(32 < len(newTopic)):
+        await context.send(f'{context.author.mention} Try a shorter one.')
+        return
+
     currentChannel = context.message.channel
-    await currentChannel.edit(topic=newTopic)
+    await currentChannel.edit(topic = newTopic)
     await context.send(f'{context.author.mention} Channel topic updated to `{newTopic}`.')
 
 ########################################################################################################################
