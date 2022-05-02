@@ -258,6 +258,17 @@ async def slow(context, amount = None, *, reason = None):
     else:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
 
+@client.command(brief       = 'Edit a channel\'s description', ################################################### topic
+                description = 'Edit a channel\'s description.')
+async def topic(context, *, newTopic = None):
+    if not context.author.guild_permissions.manage_messages: # check for user permissions
+        await context.send(f'{context.author.mention} Permission denied.')
+        return
+
+    currentChannel = context.message.channel
+    await currentChannel.edit(topic=newTopic)
+    await context.send(f'{context.author.mention} Channel topic updated to `{newTopic}`.')
+
 ########################################################################################################################
 # UTILITIES
 ########################################################################################################################
@@ -417,7 +428,7 @@ async def pls(context, animal = None, noarg = None):
     else:
         await context.send(f'{context.author.mention} {ERROR_REPLY}.')
 
-@client.command(brief       = 'Show the time of a place', ##################################################### pls
+@client.command(brief       = 'Show the time of a place', ######################################################### time
                 description = 'Show the time of a place. Use standard timezone names.')
 async def time(context, place = None, noarg = None):
     try:
