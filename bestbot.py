@@ -20,7 +20,7 @@ from discord.ext import commands
 ########################################################################################################################
 # SETUP
 ########################################################################################################################
-client = commands.Bot(command_prefix = '/')
+client = commands.Bot(command_prefix = 'bot ')
 client.echoLog = {}
 
 GH_LINK     = 'https://github.com/gentutu/bestbot'
@@ -462,7 +462,6 @@ async def on_message(message):
     allowed = True
     current_message = message.content.lower()
     current_message = current_message.replace(" ", "")
-    current_message = current_message.translate(str.maketrans('', '', string.punctuation))
 
     if date.today().weekday() != 2 and ":wednesday:" in current_message:
         await message.delete()
@@ -492,13 +491,6 @@ async def on_message_edit(before, after):
 @client.event ############################################################################################# deleted echo
 async def on_message_delete(message):
     await echoMessage('Deleted', message, colours["red"])
-
-# dis: disabled for now
-#@client.event ######################################################################################### unknown command
-#async def on_command_error(context, error):
-#    if isinstance(error, commands.CommandNotFound):
-#        context.content = "/cat"
-#        await client.process_commands(context)
 
 ########################################################################################################################
 # RUN
