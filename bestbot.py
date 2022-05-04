@@ -492,6 +492,11 @@ async def on_message_edit(before, after):
 async def on_message_delete(message):
     await echoMessage('Deleted', message, colours["red"])
 
+@client.event ########################################################################################## unknown command
+async def on_command_error(context, error):
+    if isinstance(error, commands.CommandNotFound):
+        await context.author.send(f'I have most unfortunate news. {error}.')
+
 ########################################################################################################################
 # RUN
 ########################################################################################################################
