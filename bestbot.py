@@ -454,6 +454,17 @@ async def time(context, place = None, noarg = None):
     time = time.strftime('%H:%M')
     await context.send(f'{context.author.mention} It\'s `{time}` in {place}.')
 
+@client.command(brief       = 'Show the system uptime', ######################################################### uptime
+                description = 'Show the system uptime.')
+async def uptime(context, place = None, noarg = None):
+    with open('/proc/uptime', 'r') as uptimeFile:
+        time = float(uptimeFile.readline().split()[0])
+
+    days = time / 86400
+    hours = time / 3600 % 24
+
+    await context.send(f'{context.author.mention} Approximate uptime: `{int(days)}d {int(hours)}h`')
+
 ########################################################################################################################
 # EVENTS
 ########################################################################################################################
