@@ -456,14 +456,17 @@ async def time(context, place = None, noarg = None):
 
 @client.command(brief       = 'Show the system uptime', ######################################################### uptime
                 description = 'Show the system uptime.')
-async def uptime(context, place = None, noarg = None):
-    with open('/proc/uptime', 'r') as uptimeFile:
-        time = float(uptimeFile.readline().split()[0])
+async def uptime(context, noarg = None):
+    if noarg is None: # check for no arguments
+        with open('/proc/uptime', 'r') as uptimeFile:
+            time = float(uptimeFile.readline().split()[0])
 
-    days = time / 86400
-    hours = time / 3600 % 24
+        days  = time / 86400
+        hours = time / 3600 % 24
 
-    await context.send(f'{context.author.mention} Approximate uptime: `{int(days)}d {int(hours)}h`')
+        await context.send(f'{context.author.mention} Approximate uptime: `{int(days)}d {int(hours)}h`')
+    else:
+        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
 
 ########################################################################################################################
 # EVENTS
