@@ -265,7 +265,7 @@ async def topic(context, *, newTopic = None):
         await context.send(f'{context.author.mention} Permission denied.')
         return
 
-    if(32 < len(newTopic)):
+    if(64 < len(newTopic)):
         await context.send(f'{context.author.mention} Try a shorter one.')
         return
 
@@ -475,6 +475,7 @@ async def uptime(context, noarg = None):
 async def on_message(message):
     allowed = True
     current_message = message.content.lower()
+    dad_check       = current_message
     current_message = current_message.replace(" ", "")
 
     if date.today().weekday() != 2 and ":wednesday:" in current_message:
@@ -488,6 +489,17 @@ async def on_message(message):
 
     if allowed:
         await client.process_commands(message)
+
+        if random.random() < 0.1:
+            dad_check = dad_check.replace('\'', '')
+            if dad_check.startswith('im '):
+                name = message.content.split()
+                name = ' '.join(name[1:])
+                await message.channel.send(f'hello {name} im dad')
+            elif dad_check.startswith('i am '):
+                name = message.content.split()
+                name = ' '.join(name[2:])
+                await message.channel.send(f'hello {name} im dad')
 
 @client.event ################################################################################################ blacklist
 async def on_message_edit(before, after):
