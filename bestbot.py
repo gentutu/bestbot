@@ -20,7 +20,6 @@ from discord import app_commands
 # SETUP
 ########################################################################################################################
 GH_LINK     = 'https://github.com/gentutu/bestbot'
-ERROR_REPLY = 'Incorrect command usage'
 
 colours = {
     'red'   : 0xAA2222,
@@ -149,9 +148,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.presences = True
-
 client = bestbot(intents=intents)
-client.echoLog = {}
 
 @client.event
 async def on_ready():
@@ -216,34 +213,27 @@ async def ip(context: discord.Interaction):
 @client.tree.command(description = "Remove the most recent messages.") ########################################### clear
 @app_commands.checks.has_any_role("admin", "mod")
 @app_commands.describe(amount = "Number of message to delete")
-async def clear(context: discord.Interaction, amount: int):
+async def clear(context: discord.Interaction, amount: app_commands.Range[int, 1, None]):
     await context.response.send_message("Removed the most recent messages.", ephemeral = True)
     await context.channel.purge(limit = amount)
 
 @client.tree.command(description = "Set a channel's slow mode") ################################################### slow
 @app_commands.describe(interval = "Delay between messages", reason = "Reason for slowdown")
 @app_commands.checks.has_any_role("admin", "mod")
-async def slow(context: discord.Interaction, interval: str, *, reason: str):
+async def slow(context: discord.Interaction, interval: app_commands.Range[str, 2, 3], reason: str):
     duration = {'off': 0,   '5s' : 5,   '10s': 10,  '15s': 15,   '30s': 30,   '1m' : 60,   '2m' : 120,
                 '5m' : 300, '10m': 600, '15m': 900, '30m': 1800, '1h' : 3600, '2h' : 7200, '6h' : 21600}
 
     if interval in duration:
-        await context.channel.edit(reason = '/slow command', slowmode_delay = int(duration[interval]))
-        if interval == 'off':
-            await context.response.send_message(f'Disabled slow mode with reason `{reason}`.')
-        else:
-            await context.response.send_message(f'Enabled {interval} slow mode: `{reason}`.')
+        await context.channel.edit(reason = f'{reason}', slowmode_delay = int(duration[interval]))
+        await context.response.send_message(f'Set slow mode to `{interval}` with reason `{reason}`.')
     else:
-        await context.response.send_message(f'{ERROR_REPLY}.', ephemeral = True)
+        await context.response.send_message("Unknown slow interval", ephemeral = True)
 
 @client.tree.command(description = "Update a channel's topic.") ################################################## topic
 @app_commands.describe(request = "New channel topic")
 @app_commands.checks.has_any_role("admin", "mod")
-async def newtopic(context: discord.Interaction, request: str):
-    if(64 < len(request)):
-        await context.response.send_message("Try a shorter one.", ephemeral = True)
-        return
-
+async def newtopic(context: discord.Interaction, request: app_commands.Range[str, 1, 64]):
     await context.channel.edit(topic = request)
     await context.response.send_message(f'Channel topic updated to `{request}`.')
 
@@ -263,11 +253,8 @@ async def ping(context: discord.Interaction):
 
 @client.tree.command(description = "Roll for a random number up to a maximum.") ################################### roll
 @app_commands.describe(max = "Max possible roll", terms = "Terms of the roll")
-async def roll(context: discord.Interaction, max: int, terms: str):
-    if terms is None:
-        await context.response.send_message(f'Rolled **{randint(1, maxm)}**.')
-    else:
-        await context.response.send_message(f'Rolled **{randint(1, max)}** for *{terms}*.')
+async def roll(context: discord.Interaction, max:  app_commands.Range[int, 1, None], terms: str):
+    await context.response.send_message(f'Rolled **{randint(0, max)}** for *{terms}*.')
 
 @client.tree.command(description = "Toss a coin.") ################################################################ coin
 @app_commands.describe(terms = "Terms of the flip")
@@ -314,7 +301,9 @@ async def role(context: discord.Interaction, request: str):
 
 @client.tree.command(description = "Convert currency. Use the 3-letter currency codes.") ########################## conv
 @app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
-async def conv(context: discord.Interaction, amount: int, source: str, target: str):
+async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, None],
+                                             source: app_commands.Range[str, 3, 3],
+                                             target: app_commands.Range[str, 3, 3]):
     source = source.upper()
     target = target.upper()
 
@@ -338,14 +327,14 @@ async def conv(context: discord.Interaction, amount: int, source: str, target: s
 
 @client.tree.command(description = "Request a random animal picture.") ############################################# pls
 @app_commands.describe(animal = "\"cat\" or \"dog\"")
-async def pls(context: discord.Interaction, animal: str):
+async def pls(context: discord.Interaction, animal: app_commands.Range[str, 3, 3]):
     supported_animals = ['cat', 'dog']
 
     if(animal in supported_animals):
         URL = await cat.get(animal, CAT_KEY, random.choice(['jpg', 'gif']))
         await context.response.send_message(f'{URL}')
     else:
-        await context.response.send_message(f'{ERROR_REPLY}.', ephemeral = True)
+        await context.response.send_message("Unknown request", ephemeral = True)
 
 @client.tree.command(description = "Show the time of a place.") ############################################### timezone
 @app_commands.describe(place = "TZ time zone")
