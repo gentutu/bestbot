@@ -6,13 +6,20 @@ import asyncio
 import collections, time, json
 
 ########################################################################################################################
+# DEFINES
+########################################################################################################################
+API_CURRENCY = "https://free.currconv.com/api/v7/currencies?apiKey="
+API_CONVERT1 = "https://free.currconv.com/api/v7/convert?q="
+API_CONVERT2 = "&compact=ultra&apiKey="
+
+########################################################################################################################
 # API
 ########################################################################################################################
 async def retrieve_currencies(api_key):
     async with aiohttp.ClientSession() as session:
-        async with session.get(f'https://free.currconv.com/api/v7/currencies?apiKey={api_key}') as response:
+        async with session.get(f'{API_CURRENCY}{api_key}') as response:
 
-            print(f'https://free.currconv.com/api/v7/currencies?apiKey={"*"*len(api_key)}:', response.status, response.headers['content-type'])
+            print(f'{API_CURRENCY}{"*"*len(api_key)}:', response.status, response.headers['content-type'])
 
             if response.status != 200 or 'application/json' not in response.headers['content-type']:
                 return None
@@ -26,15 +33,15 @@ async def get_exchange_rate(api_key, original, desired, __history=collections.de
     current_time = time.time()
     refresh_period = 6 * 60 * 60 # refresh exchange rates every 3 hours
 
-    keys_sorted = sorted([original, desired])
-    history_key = ':'.join(keys_sorted) # get a consistent key
+    sortk = sorted([original, desired])
+    history_key = ':'.join(sortk) # get a consistent key
 
     if __history[history_key][0] + refresh_period < current_time:
         # download exchange rate
         async with aiohttp.ClientSession() as session:
-            async with session.get(f'https://free.currconv.com/api/v7/convert?q={keys_sorted[0]}_{keys_sorted[1]}&compact=ultra&apiKey={api_key}') as response:
+            async with session.get(f'{API_CONVERT1}{sortk[0]}_{sortk[1]}{API_CONVERT2}{api_key}') as response:
                 #print('Retrieving exchange rate', history_key, '...')
-                __history[history_key] = (time.time(), (await response.json())[f'{keys_sorted[0]}_{keys_sorted[1]}'])
+                __history[history_key] = (time.time(), (await response.json())[f'{sortk[0]}_{sortk[1]}'])
 
     return __history[history_key][1] if history_key.startswith(original) else 1.0 / __history[history_key][1]
 
