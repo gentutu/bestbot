@@ -11,25 +11,22 @@ import random                           # for helix
 from random import randint              # for roll
 import urllib                           # for find
 from requests import get                # for ip
-from datetime import datetime, timezone # for time
-from zoneinfo import ZoneInfo           # for time
+from datetime import datetime, timezone # for timezone
+from zoneinfo import ZoneInfo           # for timezone
 import discord
-from discord.ext import commands
-
+from discord import app_commands
 
 ########################################################################################################################
 # SETUP
 ########################################################################################################################
-client = commands.Bot(command_prefix = 'bot ')
-client.echoLog = {}
-
 GH_LINK     = 'https://github.com/gentutu/bestbot'
-ERROR_REPLY = 'Incorrect command usage; see `/help [command]`'
+ERROR_REPLY = 'Incorrect command usage'
 
 colours = {
     'red'   : 0xAA2222,
     'green' : 0x22AA22,
-    'blue'  : 0x224466
+    'blue'  : 0x224466,
+    'grey'  : 0x666666
 }
 
 searchEngines = {
@@ -54,8 +51,8 @@ searchEngines = {
 files = {
     'f_blacklist'    : 'res/blacklist',
     'f_botToken'     : 'res/botToken',
-    'f_channelAdmin' : 'res/channelAdmin',
     'f_channelEcho'  : 'res/channelEcho',
+    'f_serverToken'  : 'res/serverToken',
     'f_cosmeticRoles': 'res/cosmeticRoles',
     'f_emoteHelix'   : 'res/emoteHelix',
     'f_currencyKey'  : 'res/currencyKey',
@@ -80,12 +77,13 @@ else:
     print(f'Error: {files["f_botToken"]} file missing')
     sys.exit()
 
-if os.path.exists(files["f_channelAdmin"]):
-    with open(files["f_channelAdmin"], 'r') as channelAdminFile:
-        global CHANNEL_ADMIN
-        CHANNEL_ADMIN = channelAdminFile.read().strip('\n')
+if os.path.exists(files["f_serverToken"]):
+    with open(files["f_serverToken"], 'r') as serverTokenFile:
+        global SERVER_TOKEN
+        SERVER_TOKEN = serverTokenFile.read().strip('\n')
+        SERVER_TOKEN = discord.Object(id=int(SERVER_TOKEN))
 else:
-    print(f'Error: {files["f_channelAdmin"]} file missing')
+    print(f'Error: {files["f_serverToken"]} file missing')
     sys.exit()
 
 if os.path.exists(files["f_channelEcho"]):
@@ -138,6 +136,23 @@ else:
     print(f'Error: {files["f_helixReplies"]} file missing')
     sys.exit()
 
+class bestbot(discord.Client):
+    def __init__(self, *, intents: discord.Intents):
+        super().__init__(intents=intents)
+        self.tree = app_commands.CommandTree(self)
+
+    async def setup_hook(self):
+        self.tree.copy_global_to(guild = SERVER_TOKEN)
+        await self.tree.sync(guild = SERVER_TOKEN)
+
+intents = discord.Intents.default()
+intents.message_content = True
+intents.members = True
+intents.presences = True
+
+client = bestbot(intents=intents)
+client.echoLog = {}
+
 @client.event
 async def on_ready():
     print('Bestbot online.')
@@ -154,9 +169,11 @@ async def echoMessage(reason, message, colour):
 
     if message.attachments:
         image = message.attachments[0]
-        client.echoLog[message.guild.id] = (image.proxy_url, message.content, message.author, message.channel.name, message.created_at)
+        client.echoLog[message.guild.id] = (image.proxy_url, message.content, message.author,
+                                            message.channel.name, message.created_at)
     else:
-        client.echoLog[message.guild.id] = (message.content,message.author, message.channel.name, message.created_at)
+        client.echoLog[message.guild.id] = (message.content,message.author, message.channel.name,
+                                            message.created_at)
 
     try:
         image_proxy_url, contents,author, channel_name, time = client.echoLog[message.guild.id]
@@ -164,14 +181,20 @@ async def echoMessage(reason, message, colour):
         contents,author, channel_name, time = client.echoLog[message.guild.id]
 
     try:
-        embed = discord.Embed(description = contents , color = colour, timestamp = time)
-        embed.set_image(url = image_proxy_url)
-        embed.set_author(name = f"{author.name}#{author.discriminator}", icon_url = author.avatar_url)
+        embed = discord.Embed(description = contents,
+                              color       = colour,
+                              timestamp   = time)
+        #embed.set_image(url = image_proxy_url)
+        embed.set_author(name     = f"{message.author.name}#{message.author.discriminator}",
+                         icon_url = message.author.avatar)
         embed.set_footer(text = f"{reason} in #{channel_name}")
         await echoChannel.send(embed = embed)
     except:
-        embed = discord.Embed(description = contents , color = colour, timestamp = time)
-        embed.set_author(name = f"{author.name}#{author.discriminator}", icon_url = author.avatar_url)
+        embed = discord.Embed(description = contents,
+                              color       = colour,
+                              timestamp   = time)
+        embed.set_author(name     = f"{message.author.name}#{message.author.discriminator}",
+                         icon_url = message.author.avatar)
         embed.set_footer(text = f"{reason} in #{channel_name}")
         await echoChannel.send(embed = embed)
 
@@ -181,292 +204,181 @@ async def echoMessage(reason, message, colour):
 ########################################################################################################################
 # MODERATION
 ########################################################################################################################
-@client.command(brief       = 'Shows the host\'s WAN IP', ########################################################### ip
-                description = '[admin] Shows the host\'s WAN IP.')
-async def ip(context, noarg = None):
-    if not context.author.guild_permissions.administrator: # check for user permissions
-        await context.send(f'{context.author.mention} Permission denied.')
-        return
+@client.tree.command(description = "Show the host\'s WAN IP.") ###################################################### ip
+@app_commands.checks.has_role("admin")
+async def ip(context: discord.Interaction):
+    host_wan_ip = get('https://api.ipify.org').text
+    embed = discord.Embed(title       = "Host WAN IP",
+                          description = f'||`{host_wan_ip}`||',
+                          color       = colours["red"])
+    await context.response.send_message(embed = embed, ephemeral = True)
 
-    if noarg is not None: # check for no arguments
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
-        return
+@client.tree.command(description = "Remove the most recent messages.") ########################################### clear
+@app_commands.checks.has_any_role("admin", "mod")
+@app_commands.describe(amount = "Number of message to delete")
+async def clear(context: discord.Interaction, amount: int):
+    await context.response.send_message("Removed the most recent messages.", ephemeral = True)
+    await context.channel.purge(limit = amount)
 
-    if int(CHANNEL_ADMIN) == context.channel.id:
-        host_wan_ip = get('https://api.ipify.org').text
-        embed = discord.Embed(title = "Host WAN IP", description = f'||`{host_wan_ip}`||', color = colours["red"])
-        await context.send(embed = embed)
-    else:
-        await context.send(f'{context.author.mention} Command not available on current channel.')
+@client.tree.command(description = "Set a channel's slow mode") ################################################### slow
+@app_commands.describe(interval = "Delay between messages", reason = "Reason for slowdown")
+@app_commands.checks.has_any_role("admin", "mod")
+async def slow(context: discord.Interaction, interval: str, *, reason: str):
+    duration = {'off': 0,   '5s' : 5,   '10s': 10,  '15s': 15,   '30s': 30,   '1m' : 60,   '2m' : 120,
+                '5m' : 300, '10m': 600, '15m': 900, '30m': 1800, '1h' : 3600, '2h' : 7200, '6h' : 21600}
 
-@client.command(brief       = 'Deletes a specified amount of messages', ########################################## clear
-                description = '[admin/mod] Deletes a specified amount of messages. Call with \'confirm\' argument.')
-async def clear(context, amount = None, confirm = None, noarg = None):
-    if not context.author.guild_permissions.manage_messages: # check for user permissions
-        await context.send(f'{context.author.mention} Permission denied.')
-        return
-
-    try: # check for correct argument type
-        if noarg is None and confirm == 'confirm': # check for no third argument
-            amount = int(amount)
-            if amount < 1:
-                raise Exception()
-            elif amount == 1:
-                await context.channel.purge(limit = amount + 1)
-                await context.send(f'{context.author.mention} cleared the last message.')
-            else:
-                await context.channel.purge(limit = amount + 1)
-                await context.send(f'{context.author.mention} cleared the last {amount} messages.')
+    if interval in duration:
+        await context.channel.edit(reason = '/slow command', slowmode_delay = int(duration[interval]))
+        if interval == 'off':
+            await context.response.send_message(f'Disabled slow mode with reason `{reason}`.')
         else:
-            raise Exception()
-    except Exception:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
-
-@client.command(brief       = 'Sets the channel\'s slow mode', #################################################### slow
-                description = '[admin/mod] Sets the channel\'s slow mode. Use `off` or a valid duration (e.g. `1m`).')
-async def slow(context, amount = None, *, reason = None):
-    if not context.author.guild_permissions.manage_messages: # check for user permissions
-        await context.send(f'{context.author.mention} Permission denied.')
-        return
-
-    duration = {
-        'off': 0,
-        '5s' : 5,
-        '10s': 10,
-        '15s': 15,
-        '30s': 30,
-        '1m' : 60,
-        '2m' : 120,
-        '5m' : 300,
-        '10m': 600,
-        '15m': 900,
-        '30m': 1800,
-        '1h' : 3600,
-        '2h' : 7200,
-        '6h' : 21600
-    }
-
-    if amount in duration:
-        await context.channel.edit(reason = '/slow command', slowmode_delay = int(duration[amount]))
-        if amount == 'off':
-            await context.send(f'{context.author.mention} disabled slow mode.')
-        else:
-            if reason is None:
-                await context.send(f'{context.author.mention} enabled {amount} slow mode.')
-            else:
-                await context.send(f'{context.author.mention} enabled {amount} slow mode with reason `{reason}`.')
+            await context.response.send_message(f'Enabled {interval} slow mode: `{reason}`.')
     else:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+        await context.response.send_message(f'{ERROR_REPLY}.', ephemeral = True)
 
-@client.command(brief       = 'Edit a channel\'s description', ################################################### topic
-                description = 'Edit a channel\'s description.')
-async def topic(context, *, newTopic = None):
-    if not context.author.guild_permissions.manage_messages: # check for user permissions
-        await context.send(f'{context.author.mention} Permission denied.')
+@client.tree.command(description = "Update a channel's topic.") ################################################## topic
+@app_commands.describe(request = "New channel topic")
+@app_commands.checks.has_any_role("admin", "mod")
+async def newtopic(context: discord.Interaction, request: str):
+    if(64 < len(request)):
+        await context.response.send_message("Try a shorter one.", ephemeral = True)
         return
 
-    if(64 < len(newTopic)):
-        await context.send(f'{context.author.mention} Try a shorter one.')
-        return
-
-    currentChannel = context.message.channel
-    await currentChannel.edit(topic = newTopic)
-    await context.send(f'{context.author.mention} Channel topic updated to `{newTopic}`.')
+    await context.channel.edit(topic = request)
+    await context.response.send_message(f'Channel topic updated to `{request}`.')
 
 ########################################################################################################################
 # UTILITIES
 ########################################################################################################################
-@client.command(brief       = 'Links towards the bot\'s source code', ########################################### source
-                description = 'Links towards the bot\'s source code.',
-                aliases     = ['saucecode', 'sauce'])
-async def source(context, noarg = None):
-    if noarg is None: # check for no arguments
-        embed = discord.Embed(title = "Best Source", description = f"<{GH_LINK}>", color = colours["red"])
-        await context.send(embed = embed)
-    else:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+@client.tree.command(description = "Link towards the bot\'s source code.") ###################################### source
+async def source(context: discord.Interaction):
+    embed = discord.Embed(title       = "Best Source",
+                          description = f"<{GH_LINK}>",
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed, ephemeral = True)
 
-@client.command(brief       = 'Checks bot status and network quality', ############################################ ping
-                description = 'Check  bot status and network quality.',
-                aliases     = ['pong'])
-async def ping(context, noarg = None):
-    if noarg is None: # check for no arguments
-        if context.invoked_with == 'pong':
-            await context.send(':dagger:')
-        else:
-            await context.send(f'pong! `{round(client.latency * 1000)}ms`')
-    else:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+@client.tree.command(description = "Check  network quality.") ##################################################### ping
+async def ping(context: discord.Interaction):
+    await context.response.send_message(f'pong! `{round(client.latency * 1000)}ms`', ephemeral = True)
 
-@client.command(brief       = 'Rolls for a random number up to a maximum', ######################################## roll
-                description = 'Rolls for a random number up to a maximum.')
-async def roll(context, maximum = None, *, terms = None):
-    try: # check for correct argument type
-        maximum = int(maximum)
-        if maximum > 1:
-            if terms is None:
-                await context.send(f'{context.author.mention} rolled {randint(1, maximum)}.')
-            else:
-                await context.send(f'{context.author.mention} rolled {randint(1, maximum)} for *{terms}*.')
-        else:
-            raise Exception()
-    except Exception:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
-
-@client.command(brief       = 'Tosses a coin', #################################################################### coin
-                description = 'Tosses a coin. Accepts terms freely.',
-                aliases     = ['toss', 'flip'])
-async def coin(context, *, terms = None):
-    sides = ['heads', 'tails']
-
+@client.tree.command(description = "Roll for a random number up to a maximum.") ################################### roll
+@app_commands.describe(max = "Max possible roll", terms = "Terms of the roll")
+async def roll(context: discord.Interaction, max: int, terms: str):
     if terms is None:
-        await context.send(f'{context.author.mention} tossed **{random.choice(sides)}**.')
+        await context.response.send_message(f'Rolled **{randint(1, maxm)}**.')
     else:
-        await context.send(f'{context.author.mention} tossed **{random.choice(sides)}** for *{terms}*.')
+        await context.response.send_message(f'Rolled **{randint(1, max)}** for *{terms}*.')
 
-@client.command(brief       = 'Consult the Helix Fossil', ######################################################## helix
-                description = 'Consult the Helix Fossil. It shall answer.')
-async def helix(context, *, question = None):
-    if question is not None: # check for at least 1 argument
-        await context.send(f'{context.author.mention} Helix Fossil says: {EMOTE_HELIX} *{random.choice(HELIX_REPLIES)}* {EMOTE_HELIX}')
+@client.tree.command(description = "Toss a coin.") ################################################################ coin
+@app_commands.describe(terms = "Terms of the flip")
+async def coin(context: discord.Interaction, terms: str):
+    sides = ['heads', 'tails']
+    if terms is None:
+        await context.response.send_message(f'Tossed **{random.choice(sides)}**.')
     else:
-        await context.send(f'{context.author.mention} Consult the Fossil. {EMOTE_HELIX}')
+        await context.response.send_message(f'Tossed **{random.choice(sides)}** for *{terms}*.')
 
-@client.command(brief       = 'Performs a web search', ############################################################ find
-                description = 'Search a lot of places. Too many to list here. See the source code.')
-async def find(context, engine = None, *, query = None):
+@client.tree.command(description = "Consult the Helix Fossil.") ################################################## helix
+@app_commands.describe(question = "It shall answer")
+async def helix(context: discord.Interaction, question: str):
+    await context.response.send_message(f'{question}\n{EMOTE_HELIX} *{random.choice(HELIX_REPLIES)}* {EMOTE_HELIX}')
+
+@client.tree.command(description = "Search the web.") ############################################################# find
+@app_commands.describe(engine = "Search engine", query = "Search query")
+async def find(context: discord.Interaction, engine: str, query: str):
     engine = engine.lower()
-    if engine == 'ph':
-        if path.exists('res/no.jpg'):
-            picture = discord.File('res/no.jpg')
-            await context.send(file=picture)
-        else:
-            await context.send(f'{context.author.mention} No.')
-        return
 
     if engine not in searchEngines: # check if the requested engine exists
-        await context.send(f'{context.author.mention} Unknown search engine.')
-        return
-
-    if query is not None: # check for at least 1 search term
+        await context.response.send_message(f'Searching for *{query}*\nUnknown search engine.', ephemeral = True)
+    else:
         search_input = searchEngines[engine] + urllib.parse.quote(query)
-        await context.send(f'{context.author.mention} Your search results: <{search_input}>')
-    else:
-        await context.send(f'{context.author.mention} What should I search for?')
+        await context.response.send_message(f'{engine.capitalize()} search: *{query}*\nYour results: <{search_input}>')
 
-@client.command(brief       = 'Toggles a role', ################################################################### role
-                description = 'Toggles a role. List all options with the `list` argument.')
-async def role(context, role_arg = None, noarg = None):
-    member = context.author
-    if noarg is not None:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+@client.tree.command(description = "Toggle a role.") ############################################################## role
+@app_commands.describe(request = "Role to toggle")
+async def role(context: discord.Interaction, request: str):
+    if request == 'list':
+        await context.response.send_message(f'Available roles: `{"`, `".join(COSMETIC_ROLES)}`.', ephemeral = True)
         return
 
-    if role_arg == 'list':
-        await context.send(f'{context.author.mention} Available roles: `{"`, `".join(COSMETIC_ROLES)}`.')
-        return
-
-    if role_arg in COSMETIC_ROLES:
-        role_arg = discord.utils.get(member.guild.roles, name = role_arg)
-        if role_arg in member.roles:
-            await discord.Member.remove_roles(member, role_arg)
-            await context.send(f'{context.author.mention} Removed `{role_arg}` role.')
+    if request in COSMETIC_ROLES:
+        request = discord.utils.get(context.guild.roles, name = request)
+        if request in context.user.roles:
+            await discord.Member.remove_roles(context.user, request)
+            await context.response.send_message(f'Removed `{request}` role.', ephemeral = True)
         else:
-            await discord.Member.add_roles(member, role_arg)
-            await context.send(f'{context.author.mention} Added `{role_arg}` role.')
-    elif role_arg is None:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+            await discord.Member.add_roles(context.user, request)
+            await context.response.send_message(f'Added `{request}` role.', ephemeral = True)
     else:
-        await context.send(f'{context.author.mention} Unsupported role.')
+        await context.response.send_message("Unsupported role.", ephemeral = True)
 
-@client.command(brief       = 'Converts currency', ################################################################ conv
-                description = 'Converts currency. Use the 3-letter currency codes.')
-async def conv(context, amount = None, source_curr = None, target_curr = None, noarg = None):
-    try: # check for int amount
-        amount = float(amount)
-        if noarg       is not None or \
-           source_curr is     None or \
-           target_curr is     None or \
-           amount      is     None:
-            raise Exception()
-    except Exception:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
-        return
+@client.tree.command(description = "Convert currency. Use the 3-letter currency codes.") ########################## conv
+@app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
+async def conv(context: discord.Interaction, amount: int, source: str, target: str):
+    source = source.upper()
+    target = target.upper()
 
-    source_curr = source_curr.upper()
-    target_curr = target_curr.upper()
-
-    if not 'currencies.json' in os.listdir('./res'): # retrieve currency data if we don't have it stored.
+    if not 'currencies.json' in os.listdir('./res'):
         await currency.retrieve_currencies(CURRENCY_KEY)
 
-    with open('./res/currencies.json', 'r') as stored_curr: # load list of currencies
+    with open('./res/currencies.json', 'r') as stored_curr:
         available_curr = json.load(stored_curr)
 
-    if source_curr not in available_curr or \
-      target_curr not in available_curr:
-        await context.send(f'{context.author.mention} Unknown currency code.')
+    if source not in available_curr or \
+       target not in available_curr:
+        await context.response.send_message("Unknown currency code.", ephemeral = True)
         return
 
-    if source_curr == target_curr:
-        await context.send(f'{context.author.mention} Nothing to convert.')
+    if source == target:
+        await context.response.send_message("Nothing to convert.", ephemeral = True)
         return
 
-    exchanged = await currency.currency_convert(CURRENCY_KEY, amount, source_curr, target_curr)
-    await context.send(f'{context.author.mention} {amount:.2f} `{source_curr}` ≈ `{target_curr}` {exchanged:.2f}')
+    exchanged = await currency.currency_convert(CURRENCY_KEY, amount, source, target)
+    await context.response.send_message(f'{amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
 
-@client.command(brief       = 'Sends a random animal picture', ##################################################### pls
-                description = 'Sends a random animal picture. Use `cat` or `dog` when requesting.')
-async def pls(context, animal = None, noarg = None):
-    try:
-        if noarg is not None:
-            raise Exception()
-    except Exception:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
-        return
-
+@client.tree.command(description = "Request a random animal picture.") ############################################# pls
+@app_commands.describe(animal = "\"cat\" or \"dog\"")
+async def pls(context: discord.Interaction, animal: str):
     supported_animals = ['cat', 'dog']
 
     if(animal in supported_animals):
         URL = await cat.get(animal, CAT_KEY, random.choice(['jpg', 'gif']))
-        await context.send(f'{URL}')
+        await context.response.send_message(f'{URL}')
     else:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+        await context.response.send_message(f'{ERROR_REPLY}.', ephemeral = True)
 
-@client.command(brief       = 'Show the time of a place', ######################################################### time
-                description = 'Show the time of a place. Use standard timezone names.')
-async def time(context, place = None, noarg = None):
-    try:
-        if noarg is not None:
-            raise Exception()
-    except Exception:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
-        return
-
+@client.tree.command(description = "Show the time of a place.") ############################################### timezone
+@app_commands.describe(place = "TZ time zone")
+async def timezone(context: discord.Interaction, place: str):
     place = place.title()
 
     try:
         time = datetime.now(ZoneInfo(str(place)))
     except:
         tzLink = 'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'
-        await context.send(f'{context.author.mention} Incorrect timezone; see <{tzLink}>.')
+        await context.response.send_message(f'Incorrect timezone; see <{tzLink}>.', ephemeral = True)
         return
 
-    time = time.strftime('%H:%M')
-    await context.send(f'{context.author.mention} It\'s `{time}` in {place}.')
+    time = discord.utils.format_dt(time, 't')
+    await context.response.send_message(f'It\'s {time} in {place}.')
 
-@client.command(brief       = 'Show the system uptime', ######################################################### uptime
-                description = 'Show the system uptime.')
-async def uptime(context, noarg = None):
-    if noarg is None: # check for no arguments
-        with open('/proc/uptime', 'r') as uptimeFile:
-            time = float(uptimeFile.readline().split()[0])
+@client.tree.command(description = "Show the system uptime.") ################################################### uptime
+@app_commands.checks.has_any_role("admin", "mod")
+async def uptime(context: discord.Interaction):
+    with open('/proc/uptime', 'r') as uptimeFile:
+        time = float(uptimeFile.readline().split()[0])
 
-        days  = time / 86400
-        hours = time / 3600 % 24
+    days  = time / 86400
+    hours = time / 3600 % 24
 
-        await context.send(f'{context.author.mention} Approximate uptime: `{int(days)}d {int(hours)}h`')
-    else:
-        await context.send(f'{context.author.mention} {ERROR_REPLY}.')
+    await context.response.send_message(f'Approximate uptime: `{int(days)}d {int(hours)}h`', ephemeral = True)
+
+@client.tree.command(description = "Show the server join date.") ################################################ uptime
+async def joined(context: discord.Interaction):
+    embed = discord.Embed(title       = "Your join date",
+                          description = f"{discord.utils.format_dt(context.user.joined_at, 'D')}",
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed, ephemeral = True)
 
 ########################################################################################################################
 # EVENTS
@@ -483,14 +395,12 @@ async def on_message(message):
         allowed = False
     else:
         for word in BLACKLIST:
-            if word in current_message:
+            if word in current_message.replace(" ", ""):
                 await message.delete()
                 allowed = False
 
     if allowed:
-        await client.process_commands(message)
-
-        if random.random() < 0.1:
+        if random.random() < 0.05:
             dad_check = dad_check.replace('\'', '')
             if dad_check.startswith('im '):
                 name = message.content.split()
@@ -506,22 +416,20 @@ async def on_message_edit(before, after):
     if before.content == after.content:
         return
 
-    await echoMessage('Edited from', before, colours["green"])
-    await echoMessage('Edited to'  , after,  colours["blue"])
+    await echoMessage("Edited from", before, colours["green"])
+    await echoMessage("Edited to"  , after,  colours["blue"])
 
-    for word in BLACKLIST:
-        current_message = after.content.lower()
-        if word in current_message.replace(" ", ""):
-            await after.delete()
+    current_message = after.content.lower()
+    if date.today().weekday() != 2 and ":wednesday:" in current_message:
+        await after.delete()
+    else:
+        for word in BLACKLIST:
+            if word in current_message.replace(" ", ""):
+                await after.delete()
 
 @client.event ############################################################################################# deleted echo
 async def on_message_delete(message):
-    await echoMessage('Deleted', message, colours["red"])
-
-@client.event ########################################################################################## unknown command
-async def on_command_error(context, error):
-    if isinstance(error, commands.CommandNotFound):
-        await context.author.send(f'I have most unfortunate news. {error}.')
+    await echoMessage("Deleted", message, colours["red"])
 
 ########################################################################################################################
 # RUN
