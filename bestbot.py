@@ -349,12 +349,21 @@ async def uptime(context: discord.Interaction):
 
     await context.response.send_message(f'Approximate uptime: `{int(days)}d {int(hours)}h`', ephemeral = True)
 
-@client.tree.command(description = "Show the server join date.") ################################################ uptime
+@client.tree.command(description = "Show the server join date.") ################################################ joined
 async def joined(context: discord.Interaction):
     embed = discord.Embed(title       = "Your join date",
                           description = f"{discord.utils.format_dt(context.user.joined_at, 'D')}",
                           color       = colours["grey"])
     await context.response.send_message(embed = embed, ephemeral = True)
+
+@client.tree.command(description = "Request a fun fact about numbers.") ######################################### number
+@app_commands.describe(request = "Type of fun fact")
+async def number(context: discord.Interaction, request: Literal["date", "math", "trivia", "year"]):
+    funFact = get(f'http://numbersapi.com/random/{request}').text
+    embed = discord.Embed(title       = "Your number fun fact",
+                          description = funFact,
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed)
 
 ########################################################################################################################
 # EVENTS
