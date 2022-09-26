@@ -216,65 +216,14 @@ async def echoMessage(reason, message, colour): ################################
         action = discord.AuditLogAction.message_delete
 
 ########################################################################################################################
-# MODERATION
+# COMMANDS
 ########################################################################################################################
-@client.tree.command(description = "Show the host\'s WAN IP.") ###################################################### ip
-@app_commands.checks.has_role("admin")
-async def ip(context: discord.Interaction):
-    host_wan_ip = get('https://api.ipify.org').text
-    embed = discord.Embed(title       = "Host WAN IP",
-                          description = f'||`{host_wan_ip}`||',
-                          color       = colours["red"])
-    await context.response.send_message(embed = embed, ephemeral = True)
-
 @client.tree.command(description = "Remove the most recent messages.") ########################################### clear
 @app_commands.checks.has_any_role("admin", "mod")
 @app_commands.describe(amount = "Number of message to delete")
 async def clear(context: discord.Interaction, amount: app_commands.Range[int, 1, None]):
     await context.channel.purge(limit = amount)
     await context.response.send_message("Removed the most recent messages.")
-
-@client.tree.command(description = "Set a channel's slow mode") ################################################### slow
-@app_commands.describe(interval = "Delay between messages", reason = "Reason for slowdown")
-@app_commands.checks.has_any_role("admin", "mod")
-async def slow(context: discord.Interaction, interval: SLOWMODE_LIST, reason: str):
-    await context.channel.edit(reason = reason, slowmode_delay = int(slowIntervals[interval]))
-    embed = discord.Embed(title       = f'Set slow mode to {interval}',
-                          description = reason,
-                          color       = colours["red"])
-    await context.response.send_message(embed = embed)
-
-@client.tree.command(description = "Update a channel's topic.") ################################################## topic
-@app_commands.describe(text = "New channel topic")
-@app_commands.checks.has_any_role("admin", "mod")
-async def subject(context: discord.Interaction, text: app_commands.Range[str, 1, 64]):
-    await context.channel.edit(topic = text)
-    embed = discord.Embed(title       = "Channel topic update",
-                          description = text,
-                          color       = colours["blue"])
-    await context.response.send_message(embed = embed)
-
-########################################################################################################################
-# UTILITIES
-########################################################################################################################
-@client.tree.command(description = "Link towards the bot\'s source code.") ###################################### source
-async def source(context: discord.Interaction):
-    embed = discord.Embed(title       = "Best Source",
-                          description = GH_LINK,
-                          color       = colours["grey"])
-    await context.response.send_message(embed = embed, ephemeral = True)
-
-@client.tree.command(description = "Check network quality.") ###################################################### ping
-async def ping(context: discord.Interaction):
-    await context.response.send_message(f'pong! `{round(client.latency * 1000)}ms`', ephemeral = True)
-
-@client.tree.command(description = "Roll for a random number up to a maximum.") ################################### roll
-@app_commands.describe(max = "Max possible roll", terms = "Terms of the roll")
-async def roll(context: discord.Interaction, max:  app_commands.Range[int, 1, None], terms: str):
-    embed = discord.Embed(title       = f'Rolled {randint(0, max)}',
-                          description = terms,
-                          color       = colours["grey"])
-    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Toss a coin.") ################################################################ coin
 @app_commands.describe(bet = "Wise choice", terms = "Terms of the flip")
@@ -291,34 +240,6 @@ async def coin(context: discord.Interaction, bet: Literal["heads", "tails"], ter
                               description = f'Lost the bet for *if {bet} {terms}*.',
                               color       = colours["red"])
     await context.response.send_message(embed = embed)
-
-@client.tree.command(description = "Consult the Helix Fossil.") ################################################## helix
-@app_commands.describe(question = "It shall answer")
-async def helix(context: discord.Interaction, question: str):
-    embed = discord.Embed(title       = "The fossil speaks",
-                          description = f'{question}\n{HELIX_EMOTE} *{random.choice(HELIX_REPLIES)}* {HELIX_EMOTE}',
-                          color       = colours["grey"])
-    await context.response.send_message(embed = embed)
-
-@client.tree.command(description = "Search the web.") ############################################################# find
-@app_commands.describe(engine = "Search engine", query = "Search query")
-async def find(context: discord.Interaction, engine: SEARCH_ENGINES_SELECTOR, query: str):
-    search_input = SEARCH_ENGINES[engine] + urllib.parse.quote(query)
-    embed = discord.Embed(title       = f'{engine} search results',
-                          description = f'{query}\n<{search_input}>',
-                          color       = colours["blue"])
-    await context.response.send_message(embed = embed)
-
-@client.tree.command(description = "Toggle a role.") ############################################################## role
-@app_commands.describe(text = "Role to toggle")
-async def role(context: discord.Interaction, text: COSMETIC_ROLES):
-    request = discord.utils.get(context.guild.roles, name = text)
-    if request in context.user.roles:
-        await discord.Member.remove_roles(context.user, request)
-        await context.response.send_message(f'Removed `{request}` role.', ephemeral = True)
-    else:
-        await discord.Member.add_roles(context.user, request)
-        await context.response.send_message(f'Added `{request}` role.', ephemeral = True)
 
 @client.tree.command(description = "Convert currency.") ########################################################### conv
 @app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
@@ -340,40 +261,31 @@ async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, 
                           color       = colours["blue"])
     await context.response.send_message(embed = embed)
 
-@client.tree.command(description = "Request a random animal picture.") ############################################# pls
-@app_commands.describe(animal = "Request type")
-async def pls(context: discord.Interaction, animal: Literal["cat", "dog"]):
-    URL = await cat.get(animal, CAT_KEY, random.choice(["jpg", "gif"]))
-    await context.response.send_message(URL)
-
-@client.tree.command(description = "Show the time of a place.") ############################################### timezone
-@app_commands.describe(place = "TZ time zone")
-async def timezone(context: discord.Interaction, place: str):
-    place = place.title()
-
-    try:
-        time = datetime.now(ZoneInfo(str(place)))
-    except:
-        tzLink = 'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'
-        await context.response.send_message(f'Incorrect timezone; see <{tzLink}>.', ephemeral = True)
-        return
-
-    time = discord.utils.format_dt(time, 't')
-    embed = discord.Embed(title       = time,
-                          description = place,
+@client.tree.command(description = "Search the web.") ############################################################# find
+@app_commands.describe(engine = "Search engine", query = "Search query")
+async def find(context: discord.Interaction, engine: SEARCH_ENGINES_SELECTOR, query: str):
+    search_input = SEARCH_ENGINES[engine] + urllib.parse.quote(query)
+    embed = discord.Embed(title       = f'{engine} search results',
+                          description = f'{query}\n<{search_input}>',
                           color       = colours["blue"])
     await context.response.send_message(embed = embed)
 
-@client.tree.command(description = "Show the system uptime.") ################################################### uptime
-@app_commands.checks.has_any_role("admin", "mod")
-async def uptime(context: discord.Interaction):
-    with open('/proc/uptime', 'r') as uptimeFile:
-        time = float(uptimeFile.readline().split()[0])
+@client.tree.command(description = "Consult the Helix Fossil.") ################################################## helix
+@app_commands.describe(question = "It shall answer")
+async def helix(context: discord.Interaction, question: str):
+    embed = discord.Embed(title       = "The fossil speaks",
+                          description = f'{question}\n{HELIX_EMOTE} *{random.choice(HELIX_REPLIES)}* {HELIX_EMOTE}',
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed)
 
-    days  = time / 86400
-    hours = time / 3600 % 24
-
-    await context.response.send_message(f'Approximate uptime: `{int(days)}d {int(hours)}h`', ephemeral = True)
+@client.tree.command(description = "Show the host\'s WAN IP.") ###################################################### ip
+@app_commands.checks.has_role("admin")
+async def ip(context: discord.Interaction):
+    host_wan_ip = get('https://api.ipify.org').text
+    embed = discord.Embed(title       = "Host WAN IP",
+                          description = f'||`{host_wan_ip}`||',
+                          color       = colours["red"])
+    await context.response.send_message(embed = embed, ephemeral = True)
 
 @client.tree.command(description = "Show the server join date.") ################################################ joined
 async def joined(context: discord.Interaction):
@@ -390,6 +302,91 @@ async def number(context: discord.Interaction, fact: Literal["date", "math", "tr
                           description = funFact,
                           color       = colours["grey"])
     await context.response.send_message(embed = embed)
+
+@client.tree.command(description = "Check network quality.") ###################################################### ping
+async def ping(context: discord.Interaction):
+    await context.response.send_message(f'pong! `{round(client.latency * 1000)}ms`', ephemeral = True)
+
+@client.tree.command(description = "Request a random animal picture.") ############################################# pls
+@app_commands.describe(animal = "Request type")
+async def pls(context: discord.Interaction, animal: Literal["cat", "dog"]):
+    URL = await cat.get(animal, CAT_KEY, random.choice(["jpg", "gif"]))
+    await context.response.send_message(URL)
+
+@client.tree.command(description = "Toggle a role.") ############################################################## role
+@app_commands.describe(text = "Role to toggle")
+async def role(context: discord.Interaction, text: COSMETIC_ROLES):
+    request = discord.utils.get(context.guild.roles, name = text)
+    if request in context.user.roles:
+        await discord.Member.remove_roles(context.user, request)
+        await context.response.send_message(f'Removed `{request}` role.', ephemeral = True)
+    else:
+        await discord.Member.add_roles(context.user, request)
+        await context.response.send_message(f'Added `{request}` role.', ephemeral = True)
+
+@client.tree.command(description = "Roll for a random number.") ################################################### roll
+@app_commands.describe(max = "Max possible roll", terms = "Terms of the roll")
+async def roll(context: discord.Interaction, max:  app_commands.Range[int, 1, None], terms: str):
+    embed = discord.Embed(title       = f'Rolled {randint(0, max)}',
+                          description = terms,
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed)
+
+@client.tree.command(description = "Set a channel's slow mode.") ################################################## slow
+@app_commands.describe(interval = "Delay between messages", reason = "Reason for slowdown")
+@app_commands.checks.has_any_role("admin", "mod")
+async def slow(context: discord.Interaction, interval: SLOWMODE_LIST, reason: str):
+    await context.channel.edit(reason = reason, slowmode_delay = int(slowIntervals[interval]))
+    embed = discord.Embed(title       = f'Set slow mode to {interval}',
+                          description = reason,
+                          color       = colours["red"])
+    await context.response.send_message(embed = embed)
+
+@client.tree.command(description = "Link towards the bot\'s source code.") ###################################### source
+async def source(context: discord.Interaction):
+    embed = discord.Embed(title       = "Best Source",
+                          description = GH_LINK,
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed, ephemeral = True)
+
+@client.tree.command(description = "Update a channel's topic.") ################################################ subject
+@app_commands.describe(text = "New channel topic")
+@app_commands.checks.has_any_role("admin", "mod")
+async def subject(context: discord.Interaction, text: app_commands.Range[str, 1, 64]):
+    await context.channel.edit(topic = text)
+    embed = discord.Embed(title       = "Channel topic update",
+                          description = text,
+                          color       = colours["blue"])
+    await context.response.send_message(embed = embed)
+
+@client.tree.command(description = "Show the current time of a timezone.") #################################### timezone
+@app_commands.describe(zone = "TZ time zone")
+async def timezone(context: discord.Interaction, zone: str):
+    zone = zone.title()
+
+    try:
+        time = datetime.now(ZoneInfo(str(zone)))
+    except:
+        tzLink = 'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'
+        await context.response.send_message(f'Incorrect timezone; see <{tzLink}>.', ephemeral = True)
+        return
+
+    time = discord.utils.format_dt(time, 't')
+    embed = discord.Embed(title       = time,
+                          description = zone,
+                          color       = colours["blue"])
+    await context.response.send_message(embed = embed)
+
+@client.tree.command(description = "Show the system uptime.") ################################################### uptime
+@app_commands.checks.has_any_role("admin", "mod")
+async def uptime(context: discord.Interaction):
+    with open('/proc/uptime', 'r') as uptimeFile:
+        time = float(uptimeFile.readline().split()[0])
+
+    days  = time / 86400
+    hours = time / 3600 % 24
+
+    await context.response.send_message(f'Approximate uptime: `{int(days)}d {int(hours)}h`', ephemeral = True)
 
 ########################################################################################################################
 # EVENTS
