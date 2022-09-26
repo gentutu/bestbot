@@ -27,6 +27,7 @@ Simple Discord bot with basic(-ish) functionality
 * https://www.currencyconverterapi.com/ for the currency conversion API
 * https://thecatapi.com/ for the cat picture API
 * https://thedogapi.com/ for the dog picture API
+* http://numbersapi.com for the number fun facts API
 
 ---
 ### License
