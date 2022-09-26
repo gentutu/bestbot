@@ -2,64 +2,54 @@
 # INCLUDES
 ########################################################################################################################
 import os
+from   os import path
 import sys
-from datetime import date               # for blacklist
-import string                           # for blacklist
-from os import path                     # for find
-import json                             # for conv
-import random                           # for helix
-from random import randint              # for roll
-import urllib                           # for find
-from requests import get                # for ip
-from datetime import datetime, timezone # for timezone
-from zoneinfo import ZoneInfo           # for timezone
+import string
+from typing import Literal
+from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 import discord
-from discord import app_commands
+from   discord import app_commands
+import json
+import random
+from   random import randint
+import urllib
+from requests import get
 
 ########################################################################################################################
-# SETUP
+# CFG
 ########################################################################################################################
-GH_LINK     = 'https://github.com/gentutu/bestbot'
+GH_LINK = 'https://github.com/gentutu/bestbot'
 
 colours = {
-    'red'   : 0xAA2222,
-    'green' : 0x22AA22,
-    'blue'  : 0x224466,
-    'grey'  : 0x666666
+    'red'  : 0xAA2222,
+    'green': 0x22AA22,
+    'blue' : 0x224466,
+    'grey' : 0x666666
 }
 
-searchEngines = {
-    'google' : 'https://www.google.com/search?q=',
-    'yt'     : 'https://www.youtube.com/results?search_query=',
-    'ddg'    : 'https://duckduckgo.com/?q=',
-    'bing'   : 'https://www.bing.com/search?q=',
-    'sp'     : 'https://startpage.com/do/search?q=',
-    'wiki'   : 'https://en.wikipedia.org/wiki/Search?search=',
-    'reddit' : 'https://www.reddit.com/search/?q=',
-    'gh'     : 'https://github.com/search?q=',
-    'aw'     : 'https://wiki.archlinux.org/index.php?search=',
-    'gw'     : 'https://wiki.gentoo.org/index.php?search=',
-    'pcgw'   : 'https://www.pcgamingwiki.com/w/index.php?search=',
-    'wdb'    : 'https://www.winehq.org/search?q=',
-    'pdb'    : 'https://www.protondb.com/search?q=',
-    'ud'     : 'https://www.urbandictionary.com/define.php?term=',
-    'mcw'    : 'https://minecraft.gamepedia.com/Special:Search?search=',
-    'cheat'  : 'https://cheat.sh/'
-}
+slowIntervals = {'off': 0,   '5s' : 5,   '10s': 10,  '15s': 15,   '30s': 30,   '1m' : 60,   '2m' : 120,
+                 '5m' : 300, '10m': 600, '15m': 900, '30m': 1800, '1h' : 3600, '2h' : 7200, '6h' : 21600}
+SLOWMODE_LIST = Literal[tuple(list(slowIntervals))]
 
 files = {
     'f_blacklist'    : 'res/blacklist',
     'f_botToken'     : 'res/botToken',
-    'f_channelEcho'  : 'res/channelEcho',
-    'f_serverToken'  : 'res/serverToken',
-    'f_cosmeticRoles': 'res/cosmeticRoles',
-    'f_emoteHelix'   : 'res/emoteHelix',
-    'f_currencyKey'  : 'res/currencyKey',
     'f_catKey'       : 'res/catKey',
-    'f_helixReplies' : 'res/helixReplies'
+    'f_channelEcho'  : 'res/channelEcho',
+    'f_cosmeticRoles': 'res/cosmeticRoles',
+    'f_currencyKey'  : 'res/currencyKey',
+    'f_currencyList' : 'res/currencyList',
+    'f_helixEmote'   : 'res/helixEmote',
+    'f_helixReplies' : 'res/helixReplies',
+    'f_searchEngines': 'res/searchEngines',
+    'f_serverToken'  : 'res/serverToken',
 }
 
-if os.path.exists(files["f_blacklist"]):
+########################################################################################################################
+# SETUP
+########################################################################################################################
+if os.path.exists(files["f_blacklist"]): ##################################################################### blacklist
     with open(files["f_blacklist"], 'r') as blacklistFile:
         global BLACKLIST
         BLACKLIST = blacklistFile.read().split()
@@ -68,7 +58,7 @@ else:
     print(f'Error: {files["f_blacklist"]} file missing')
     sys.exit()
 
-if os.path.exists(files["f_botToken"]):
+if os.path.exists(files["f_botToken"]): ####################################################################### botToken
     with open(files["f_botToken"], 'r') as botTokenFile:
         global BOT_TOKEN
         BOT_TOKEN = botTokenFile.read().strip('\n')
@@ -76,49 +66,7 @@ else:
     print(f'Error: {files["f_botToken"]} file missing')
     sys.exit()
 
-if os.path.exists(files["f_serverToken"]):
-    with open(files["f_serverToken"], 'r') as serverTokenFile:
-        global SERVER_TOKEN
-        SERVER_TOKEN = serverTokenFile.read().strip('\n')
-        SERVER_TOKEN = discord.Object(id=int(SERVER_TOKEN))
-else:
-    print(f'Error: {files["f_serverToken"]} file missing')
-    sys.exit()
-
-if os.path.exists(files["f_channelEcho"]):
-    with open(files["f_channelEcho"], 'r') as channelEchoFile:
-        global CHANNEL_ECHO
-        CHANNEL_ECHO = channelEchoFile.read().strip('\n')
-else:
-    print(f'Error: {files["f_channelEcho"]} file missing')
-    sys.exit()
-
-if os.path.exists(files["f_cosmeticRoles"]):
-    with open(files["f_cosmeticRoles"], 'r') as cosmeticRolesFile:
-        global COSMETIC_ROLES
-        COSMETIC_ROLES = cosmeticRolesFile.read().split('\n')
-        COSMETIC_ROLES = [element for element in COSMETIC_ROLES if element]
-else:
-    print(f'Error: {files["f_cosmeticRoles"]} file missing')
-    sys.exit()
-
-if os.path.exists(files["f_emoteHelix"]):
-    with open(files["f_emoteHelix"], 'r') as emoteHelixFile:
-        global EMOTE_HELIX
-        EMOTE_HELIX = emoteHelixFile.read().strip('\n')
-else:
-    print(f'Error: {files["f_emoteHelix"]} file missing')
-    sys.exit()
-
-if os.path.exists(files["f_currencyKey"]):
-    import currency
-    with open(files["f_currencyKey"], 'r') as currencyKeyFile:
-        global CURRENCY_KEY
-        CURRENCY_KEY = currencyKeyFile.read().strip('\n') # https://www.currencyconverterapi.com/
-else:
-    CURRENCY_KEY = None
-
-if os.path.exists(files["f_catKey"]):
+if os.path.exists(files["f_catKey"]): ########################################################################### catKey
     import cat
     with open(files["f_catKey"], 'r') as catKeyFile:
         global CAT_KEY
@@ -126,7 +74,52 @@ if os.path.exists(files["f_catKey"]):
 else:
     CAT_KEY = None
 
-if os.path.exists(files["f_helixReplies"]):
+if os.path.exists(files["f_channelEcho"]): ################################################################# channelEcho
+    with open(files["f_channelEcho"], 'r') as channelEchoFile:
+        global CHANNEL_ECHO
+        CHANNEL_ECHO = channelEchoFile.read().strip('\n')
+else:
+    print(f'Error: {files["f_channelEcho"]} file missing')
+    sys.exit()
+
+if os.path.exists(files["f_cosmeticRoles"]): ############################################################# cosmeticRoles
+    with open(files["f_cosmeticRoles"], 'r') as cosmeticRolesFile:
+        global COSMETIC_ROLES
+        COSMETIC_ROLES = cosmeticRolesFile.read().split('\n')
+        COSMETIC_ROLES = [element for element in COSMETIC_ROLES if element]
+        COSMETIC_ROLES = Literal[tuple(COSMETIC_ROLES)]
+else:
+    print(f'Error: {files["f_cosmeticRoles"]} file missing')
+    sys.exit()
+
+if os.path.exists(files["f_currencyKey"]): ################################################################# currencyKey
+    import currency
+    with open(files["f_currencyKey"], 'r') as currencyKeyFile:
+        global CURRENCY_KEY
+        CURRENCY_KEY = currencyKeyFile.read().strip('\n') # https://www.currencyconverterapi.com/
+else:
+    CURRENCY_KEY = None
+
+if os.path.exists(files["f_currencyList"]): ############################################################### currencyList
+    import currency
+    with open(files["f_currencyList"], 'r') as currencyListFile:
+        global CURRENCY_LIST
+        CURRENCY_LIST = currencyListFile.read().split('\n') # https://www.currencyconverterapi.com/
+        CURRENCY_LIST = [element for element in CURRENCY_LIST if element]
+        CURRENCY_LIST = Literal[tuple(CURRENCY_LIST)]
+else:
+    print(f'Error: {files["f_currencyList"]} file missing')
+    sys.exit()
+
+if os.path.exists(files["f_helixEmote"]): ################################################################### helixEmote
+    with open(files["f_helixEmote"], 'r') as helixEmoteFile:
+        global HELIX_EMOTE
+        HELIX_EMOTE = helixEmoteFile.read().strip('\n')
+else:
+    print(f'Error: {files["f_helixEmote"]} file missing')
+    sys.exit()
+
+if os.path.exists(files["f_helixReplies"]): ############################################################### helixReplies
     with open(files["f_helixReplies"], 'r') as helixRepliesFile:
         global HELIX_REPLIES
         HELIX_REPLIES = open(files["f_helixReplies"], 'r').read().split('\n')
@@ -135,7 +128,30 @@ else:
     print(f'Error: {files["f_helixReplies"]} file missing')
     sys.exit()
 
-class bestbot(discord.Client):
+if os.path.exists(files["f_searchEngines"]): ############################################################### searchEngines
+    with open(files["f_searchEngines"], 'r') as searchEnginesFile:
+        searchEngines = {}
+        global SEARCH_ENGINES
+        global SEARCH_ENGINES_SELECTOR
+        for line in searchEnginesFile:
+            engine, link = line.strip().split(" - ")
+            searchEngines[engine.strip()] = link.strip()
+        SEARCH_ENGINES = searchEngines
+        SEARCH_ENGINES_SELECTOR = Literal[tuple(list(SEARCH_ENGINES))]
+else:
+    print(f'Error: {files["f_searchEngines"]} file missing')
+    sys.exit()
+
+if os.path.exists(files["f_serverToken"]): ################################################################# serverToken
+    with open(files["f_serverToken"], 'r') as serverTokenFile:
+        global SERVER_TOKEN
+        SERVER_TOKEN = serverTokenFile.read().strip('\n')
+        SERVER_TOKEN = discord.Object(id=int(SERVER_TOKEN))
+else:
+    print(f'Error: {files["f_serverToken"]} file missing')
+    sys.exit()
+
+class bestbot(discord.Client): ############################################################################ client setup
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
@@ -149,6 +165,7 @@ intents.message_content = True
 intents.members = True
 intents.presences = True
 client = bestbot(intents=intents)
+client.echoLog = {}
 
 @client.event
 async def on_ready():
@@ -158,7 +175,7 @@ async def on_ready():
 ########################################################################################################################
 # LOCAL API
 ########################################################################################################################
-async def echoMessage(reason, message, colour):
+async def echoMessage(reason, message, colour): ############################################################ echoMessage
     echoChannel = client.get_channel(int(CHANNEL_ECHO))
 
     if message.author.id == client.user.id:
@@ -220,15 +237,9 @@ async def clear(context: discord.Interaction, amount: app_commands.Range[int, 1,
 @client.tree.command(description = "Set a channel's slow mode") ################################################### slow
 @app_commands.describe(interval = "Delay between messages", reason = "Reason for slowdown")
 @app_commands.checks.has_any_role("admin", "mod")
-async def slow(context: discord.Interaction, interval: app_commands.Range[str, 2, 3], reason: str):
-    duration = {'off': 0,   '5s' : 5,   '10s': 10,  '15s': 15,   '30s': 30,   '1m' : 60,   '2m' : 120,
-                '5m' : 300, '10m': 600, '15m': 900, '30m': 1800, '1h' : 3600, '2h' : 7200, '6h' : 21600}
-
-    if interval in duration:
-        await context.channel.edit(reason = f'{reason}', slowmode_delay = int(duration[interval]))
+async def slow(context: discord.Interaction, interval: SLOWMODE_LIST, reason: str):
+        await context.channel.edit(reason = f'{reason}', slowmode_delay = int(slowIntervals[interval]))
         await context.response.send_message(f'Set slow mode to `{interval}` with reason `{reason}`.')
-    else:
-        await context.response.send_message("Unknown slow interval", ephemeral = True)
 
 @client.tree.command(description = "Update a channel's topic.") ################################################## topic
 @app_commands.describe(request = "New channel topic")
@@ -247,76 +258,57 @@ async def source(context: discord.Interaction):
                           color       = colours["grey"])
     await context.response.send_message(embed = embed, ephemeral = True)
 
-@client.tree.command(description = "Check  network quality.") ##################################################### ping
+@client.tree.command(description = "Check network quality.") ###################################################### ping
 async def ping(context: discord.Interaction):
     await context.response.send_message(f'pong! `{round(client.latency * 1000)}ms`', ephemeral = True)
 
 @client.tree.command(description = "Roll for a random number up to a maximum.") ################################### roll
 @app_commands.describe(max = "Max possible roll", terms = "Terms of the roll")
 async def roll(context: discord.Interaction, max:  app_commands.Range[int, 1, None], terms: str):
-    await context.response.send_message(f'Rolled **{randint(0, max)}** for *{terms}*.')
+    await context.response.send_message(f'Rolled **{randint(0, max)}** for: {terms}.')
 
 @client.tree.command(description = "Toss a coin.") ################################################################ coin
-@app_commands.describe(terms = "Terms of the flip")
-async def coin(context: discord.Interaction, terms: str):
-    sides = ['heads', 'tails']
-    if terms is None:
-        await context.response.send_message(f'Tossed **{random.choice(sides)}**.')
+@app_commands.describe(bet = "Wise choice", terms = "Terms of the flip")
+async def coin(context: discord.Interaction, bet: Literal["heads", "tails"], terms: str):
+    sides = ["heads", "tails"]
+    flip = random.choice(sides)
+
+    if flip == bet:
+        await context.response.send_message(f':sunglasses: Tossed **{flip}**! Won the bet for *if {bet} {terms}*.')
     else:
-        await context.response.send_message(f'Tossed **{random.choice(sides)}** for *{terms}*.')
+        await context.response.send_message(f':sob: Tossed **{flip}**! Lost the bet for *if {bet} {terms}*.')
 
 @client.tree.command(description = "Consult the Helix Fossil.") ################################################## helix
 @app_commands.describe(question = "It shall answer")
 async def helix(context: discord.Interaction, question: str):
-    await context.response.send_message(f'{question}\n{EMOTE_HELIX} *{random.choice(HELIX_REPLIES)}* {EMOTE_HELIX}')
+    await context.response.send_message(f'{question}\n{HELIX_EMOTE} *{random.choice(HELIX_REPLIES)}* {HELIX_EMOTE}')
 
 @client.tree.command(description = "Search the web.") ############################################################# find
 @app_commands.describe(engine = "Search engine", query = "Search query")
-async def find(context: discord.Interaction, engine: str, query: str):
-    engine = engine.lower()
-
-    if engine not in searchEngines: # check if the requested engine exists
-        await context.response.send_message(f'Searching for *{query}*\nUnknown search engine.', ephemeral = True)
-    else:
-        search_input = searchEngines[engine] + urllib.parse.quote(query)
-        await context.response.send_message(f'{engine.capitalize()} search: *{query}*\nYour results: <{search_input}>')
+async def find(context: discord.Interaction, engine: SEARCH_ENGINES_SELECTOR, query: str):
+    search_input = SEARCH_ENGINES[engine] + urllib.parse.quote(query)
+    await context.response.send_message(f'{engine.capitalize()} search: {query}\nYour results: <{search_input}>')
 
 @client.tree.command(description = "Toggle a role.") ############################################################## role
 @app_commands.describe(request = "Role to toggle")
-async def role(context: discord.Interaction, request: str):
-    if request == 'list':
-        await context.response.send_message(f'Available roles: `{"`, `".join(COSMETIC_ROLES)}`.', ephemeral = True)
-        return
-
-    if request in COSMETIC_ROLES:
-        request = discord.utils.get(context.guild.roles, name = request)
-        if request in context.user.roles:
-            await discord.Member.remove_roles(context.user, request)
-            await context.response.send_message(f'Removed `{request}` role.', ephemeral = True)
-        else:
-            await discord.Member.add_roles(context.user, request)
-            await context.response.send_message(f'Added `{request}` role.', ephemeral = True)
+async def role(context: discord.Interaction, request: COSMETIC_ROLES):
+    request = discord.utils.get(context.guild.roles, name = request)
+    if request in context.user.roles:
+        await discord.Member.remove_roles(context.user, request)
+        await context.response.send_message(f'Removed `{request}` role.', ephemeral = True)
     else:
-        await context.response.send_message("Unsupported role.", ephemeral = True)
+        await discord.Member.add_roles(context.user, request)
+        await context.response.send_message(f'Added `{request}` role.', ephemeral = True)
 
-@client.tree.command(description = "Convert currency. Use the 3-letter currency codes.") ########################## conv
+@client.tree.command(description = "Convert currency.") ########################################################### conv
 @app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
 async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, None],
-                                             source: app_commands.Range[str, 3, 3],
-                                             target: app_commands.Range[str, 3, 3]):
-    source = source.upper()
-    target = target.upper()
-
+                                             source: CURRENCY_LIST, target: CURRENCY_LIST):
     if not 'currencies.json' in os.listdir('./res'):
         await currency.retrieve_currencies(CURRENCY_KEY)
 
     with open('./res/currencies.json', 'r') as stored_curr:
         available_curr = json.load(stored_curr)
-
-    if source not in available_curr or \
-       target not in available_curr:
-        await context.response.send_message("Unknown currency code.", ephemeral = True)
-        return
 
     if source == target:
         await context.response.send_message("Nothing to convert.", ephemeral = True)
@@ -326,15 +318,10 @@ async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, 
     await context.response.send_message(f'{amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
 
 @client.tree.command(description = "Request a random animal picture.") ############################################# pls
-@app_commands.describe(animal = "\"cat\" or \"dog\"")
-async def pls(context: discord.Interaction, animal: app_commands.Range[str, 3, 3]):
-    supported_animals = ['cat', 'dog']
-
-    if(animal in supported_animals):
-        URL = await cat.get(animal, CAT_KEY, random.choice(['jpg', 'gif']))
-        await context.response.send_message(f'{URL}')
-    else:
-        await context.response.send_message("Unknown request", ephemeral = True)
+@app_commands.describe(animal = "Request type")
+async def pls(context: discord.Interaction, animal: Literal["cat", "dog"]):
+    URL = await cat.get(animal, CAT_KEY, random.choice(["jpg", "gif"]))
+    await context.response.send_message(f'{URL}')
 
 @client.tree.command(description = "Show the time of a place.") ############################################### timezone
 @app_commands.describe(place = "TZ time zone")
@@ -400,7 +387,7 @@ async def on_message(message):
                 name = ' '.join(name[2:])
                 await message.channel.send(f'hello {name} im dad')
 
-@client.event ################################################################################################ blacklist
+@client.event ############################################################################################## edited echo
 async def on_message_edit(before, after):
     if before.content == after.content:
         return
