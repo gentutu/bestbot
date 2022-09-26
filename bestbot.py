@@ -19,7 +19,7 @@ from requests import get
 ########################################################################################################################
 # CFG
 ########################################################################################################################
-GH_LINK = 'https://github.com/gentutu/bestbot'
+GH_LINK = '<https://github.com/gentutu/bestbot>'
 
 colours = {
     'red'  : 0xAA2222,
@@ -231,22 +231,28 @@ async def ip(context: discord.Interaction):
 @app_commands.checks.has_any_role("admin", "mod")
 @app_commands.describe(amount = "Number of message to delete")
 async def clear(context: discord.Interaction, amount: app_commands.Range[int, 1, None]):
-    await context.response.send_message("Removed the most recent messages.", ephemeral = True)
     await context.channel.purge(limit = amount)
+    await context.response.send_message("Removed the most recent messages.")
 
 @client.tree.command(description = "Set a channel's slow mode") ################################################### slow
 @app_commands.describe(interval = "Delay between messages", reason = "Reason for slowdown")
 @app_commands.checks.has_any_role("admin", "mod")
 async def slow(context: discord.Interaction, interval: SLOWMODE_LIST, reason: str):
-        await context.channel.edit(reason = f'{reason}', slowmode_delay = int(slowIntervals[interval]))
-        await context.response.send_message(f'Set slow mode to `{interval}` with reason `{reason}`.')
+    await context.channel.edit(reason = reason, slowmode_delay = int(slowIntervals[interval]))
+    embed = discord.Embed(title       = f'Set slow mode to {interval}',
+                          description = reason,
+                          color       = colours["red"])
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Update a channel's topic.") ################################################## topic
-@app_commands.describe(request = "New channel topic")
+@app_commands.describe(text = "New channel topic")
 @app_commands.checks.has_any_role("admin", "mod")
-async def newtopic(context: discord.Interaction, request: app_commands.Range[str, 1, 64]):
-    await context.channel.edit(topic = request)
-    await context.response.send_message(f'Channel topic updated to `{request}`.')
+async def subject(context: discord.Interaction, text: app_commands.Range[str, 1, 64]):
+    await context.channel.edit(topic = text)
+    embed = discord.Embed(title       = "Channel topic update",
+                          description = text,
+                          color       = colours["blue"])
+    await context.response.send_message(embed = embed)
 
 ########################################################################################################################
 # UTILITIES
@@ -254,7 +260,7 @@ async def newtopic(context: discord.Interaction, request: app_commands.Range[str
 @client.tree.command(description = "Link towards the bot\'s source code.") ###################################### source
 async def source(context: discord.Interaction):
     embed = discord.Embed(title       = "Best Source",
-                          description = f"<{GH_LINK}>",
+                          description = GH_LINK,
                           color       = colours["grey"])
     await context.response.send_message(embed = embed, ephemeral = True)
 
@@ -265,7 +271,10 @@ async def ping(context: discord.Interaction):
 @client.tree.command(description = "Roll for a random number up to a maximum.") ################################### roll
 @app_commands.describe(max = "Max possible roll", terms = "Terms of the roll")
 async def roll(context: discord.Interaction, max:  app_commands.Range[int, 1, None], terms: str):
-    await context.response.send_message(f'Rolled **{randint(0, max)}** for: {terms}.')
+    embed = discord.Embed(title       = f'Rolled {randint(0, max)}',
+                          description = terms,
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Toss a coin.") ################################################################ coin
 @app_commands.describe(bet = "Wise choice", terms = "Terms of the flip")
@@ -274,25 +283,36 @@ async def coin(context: discord.Interaction, bet: Literal["heads", "tails"], ter
     flip = random.choice(sides)
 
     if flip == bet:
-        await context.response.send_message(f':sunglasses: Tossed **{flip}**! Won the bet for *if {bet} {terms}*.')
+        embed = discord.Embed(title       = f':sunglasses: Tossed **{flip}**!',
+                              description = f'Won the bet for *if {bet} {terms}*.',
+                              color       = colours["green"])
     else:
-        await context.response.send_message(f':sob: Tossed **{flip}**! Lost the bet for *if {bet} {terms}*.')
+        embed = discord.Embed(title       = f':sob: Tossed **{flip}**!',
+                              description = f'Lost the bet for *if {bet} {terms}*.',
+                              color       = colours["red"])
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Consult the Helix Fossil.") ################################################## helix
 @app_commands.describe(question = "It shall answer")
 async def helix(context: discord.Interaction, question: str):
-    await context.response.send_message(f'{question}\n{HELIX_EMOTE} *{random.choice(HELIX_REPLIES)}* {HELIX_EMOTE}')
+    embed = discord.Embed(title       = "The fossil speaks",
+                          description = f'{question}\n{HELIX_EMOTE} *{random.choice(HELIX_REPLIES)}* {HELIX_EMOTE}',
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Search the web.") ############################################################# find
 @app_commands.describe(engine = "Search engine", query = "Search query")
 async def find(context: discord.Interaction, engine: SEARCH_ENGINES_SELECTOR, query: str):
     search_input = SEARCH_ENGINES[engine] + urllib.parse.quote(query)
-    await context.response.send_message(f'{engine.capitalize()} search: {query}\nYour results: <{search_input}>')
+    embed = discord.Embed(title       = f'{engine} search results',
+                          description = f'{query}\n<{search_input}>',
+                          color       = colours["blue"])
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Toggle a role.") ############################################################## role
-@app_commands.describe(request = "Role to toggle")
-async def role(context: discord.Interaction, request: COSMETIC_ROLES):
-    request = discord.utils.get(context.guild.roles, name = request)
+@app_commands.describe(text = "Role to toggle")
+async def role(context: discord.Interaction, text: COSMETIC_ROLES):
+    request = discord.utils.get(context.guild.roles, name = text)
     if request in context.user.roles:
         await discord.Member.remove_roles(context.user, request)
         await context.response.send_message(f'Removed `{request}` role.', ephemeral = True)
@@ -315,13 +335,16 @@ async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, 
         return
 
     exchanged = await currency.currency_convert(CURRENCY_KEY, amount, source, target)
-    await context.response.send_message(f'{amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}')
+    embed = discord.Embed(title       = "Currency conversion",
+                          description = f'{amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}',
+                          color       = colours["blue"])
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Request a random animal picture.") ############################################# pls
 @app_commands.describe(animal = "Request type")
 async def pls(context: discord.Interaction, animal: Literal["cat", "dog"]):
     URL = await cat.get(animal, CAT_KEY, random.choice(["jpg", "gif"]))
-    await context.response.send_message(f'{URL}')
+    await context.response.send_message(URL)
 
 @client.tree.command(description = "Show the time of a place.") ############################################### timezone
 @app_commands.describe(place = "TZ time zone")
@@ -336,7 +359,10 @@ async def timezone(context: discord.Interaction, place: str):
         return
 
     time = discord.utils.format_dt(time, 't')
-    await context.response.send_message(f'It\'s {time} in {place}.')
+    embed = discord.Embed(title       = time,
+                          description = place,
+                          color       = colours["blue"])
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Show the system uptime.") ################################################### uptime
 @app_commands.checks.has_any_role("admin", "mod")
@@ -354,13 +380,13 @@ async def joined(context: discord.Interaction):
     embed = discord.Embed(title       = "Your join date",
                           description = f"{discord.utils.format_dt(context.user.joined_at, 'D')}",
                           color       = colours["grey"])
-    await context.response.send_message(embed = embed, ephemeral = True)
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Request a fun fact about numbers.") ######################################### number
-@app_commands.describe(request = "Type of fun fact")
-async def number(context: discord.Interaction, request: Literal["date", "math", "trivia", "year"]):
-    funFact = get(f'http://numbersapi.com/random/{request}').text
-    embed = discord.Embed(title       = "Your number fun fact",
+@app_commands.describe(fact = "Type of fun fact")
+async def number(context: discord.Interaction, fact: Literal["date", "math", "trivia", "year"]):
+    funFact = get(f'http://numbersapi.com/random/{fact}').text
+    embed = discord.Embed(title       = "Number fun fact",
                           description = funFact,
                           color       = colours["grey"])
     await context.response.send_message(embed = embed)
