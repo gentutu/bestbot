@@ -365,13 +365,13 @@ async def timezone(context: discord.Interaction, zone: str):
     zone = zone.title()
 
     try:
-        time = datetime.now(ZoneInfo(str(zone)))
+        time = datetime.now(ZoneInfo(zone))
     except:
         tzLink = 'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'
         await context.response.send_message(f'Incorrect timezone; see <{tzLink}>.', ephemeral = True)
         return
 
-    time = discord.utils.format_dt(time, 't')
+    time = time.strftime("%Y-%m-%d %H:%M:%S")
     embed = discord.Embed(title       = time,
                           description = zone,
                           color       = colours["blue"])
