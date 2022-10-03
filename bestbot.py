@@ -128,7 +128,7 @@ else:
     print(f'Error: {files["f_helixReplies"]} file missing')
     sys.exit()
 
-if os.path.exists(files["f_searchEngines"]): ############################################################### searchEngines
+if os.path.exists(files["f_searchEngines"]): ############################################################# searchEngines
     with open(files["f_searchEngines"], 'r') as searchEnginesFile:
         searchEngines = {}
         global SEARCH_ENGINES
@@ -286,13 +286,6 @@ async def ip(context: discord.Interaction):
                           description = f'||`{host_wan_ip}`||',
                           color       = colours["red"])
     await context.response.send_message(embed = embed, ephemeral = True)
-
-@client.tree.command(description = "Show the server join date.") ################################################ joined
-async def joined(context: discord.Interaction):
-    embed = discord.Embed(title       = "Your join date",
-                          description = f"{discord.utils.format_dt(context.user.joined_at, 'D')}",
-                          color       = colours["grey"])
-    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Request a fun fact about numbers.") ######################################### number
 @app_commands.describe(fact = "Type of fun fact")
