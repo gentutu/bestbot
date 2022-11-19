@@ -15,6 +15,8 @@ import random
 from   random import randint
 import urllib
 from requests import get
+import xml.etree.ElementTree as ET
+import aiohttp
 
 ########################################################################################################################
 # CFG
@@ -215,6 +217,30 @@ async def echoMessage(reason, message, colour): ################################
     async for entry in message.guild.audit_logs(action = discord.AuditLogAction.message_delete):
         action = discord.AuditLogAction.message_delete
 
+async def getCat(animal, apiKey, mimeType):
+    headers = {
+        'x-api-key'   : apiKey,
+        'Content-Type': 'application/json'
+    }
+    params = {
+        'mime_types': mimeType
+    }
+
+    if(animal == 'cat'):
+        API = 'https://api.thecatapi.com/v1/images/search'
+    elif(animal == 'dog'):
+        API = 'https://api.thedogapi.com/v1/images/search'
+    else:
+        return "Unknown API"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(API, headers = headers, params = params) as response:
+            if response.status != 200 or 'application/json' not in response.headers['content-type']:
+                return "Cannot reach API"
+            else:
+                url = await response.json()
+                return url[0]['url']
+
 ########################################################################################################################
 # COMMANDS
 ########################################################################################################################
@@ -241,25 +267,33 @@ async def coin(context: discord.Interaction, bet: Literal["heads", "tails"], ter
                               color       = colours["red"])
     await context.response.send_message(embed = embed)
 
-#@client.tree.command(description = "Convert currency.") ########################################################## conv
-#@app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
-#async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, None],
-#                                             source: CURRENCY_LIST, target: CURRENCY_LIST):
-#    if not 'currencies.json' in os.listdir('./res'):
-#        await currency.retrieve_currencies(CURRENCY_KEY)
-#
-#    with open('./res/currencies.json', 'r') as stored_curr:
-#        available_curr = json.load(stored_curr)
-#
-#    if source == target:
-#        await context.response.send_message("Nothing to convert.", ephemeral = True)
-#        return
-#
-#    exchanged = await currency.currency_convert(CURRENCY_KEY, amount, source, target)
-#    embed = discord.Embed(title       = "Currency conversion",
-#                          description = f'{amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}',
-#                          color       = colours["blue"])
-#    await context.response.send_message(embed = embed)
+@client.tree.command(description = "Convert currency.") ########################################################## conv
+@app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
+async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, None],
+                                             source: CURRENCY_LIST, target: CURRENCY_LIST):
+    if source == target:
+        await context.response.send_message("Nothing to convert.", ephemeral = True)
+        return
+
+    sourceRate = 1 # assume EUR
+    targetRate = 1 # assume EUR
+
+    with urllib.request.urlopen("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml") as url:
+        root = ET.parse(url).getroot()
+        for child in root:
+            for subchild in child:
+                for subsubchild in subchild:
+                    if source == subsubchild.attrib['currency']:
+                        sourceRate = subsubchild.attrib['rate']
+                    elif target == subsubchild.attrib['currency']:
+                        targetRate = subsubchild.attrib['rate']
+
+    exchanged = amount * float(targetRate) / float(sourceRate)
+
+    embed = discord.Embed(title       = "Currency conversion",
+                          description = f'{amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}',
+                          color       = colours["blue"])
+    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Search the web.") ############################################################# find
 @app_commands.describe(engine = "Search engine", query = "Search query")
@@ -303,7 +337,7 @@ async def ping(context: discord.Interaction):
 @client.tree.command(description = "Request a random animal picture.") ############################################# pls
 @app_commands.describe(animal = "Request type")
 async def pls(context: discord.Interaction, animal: Literal["cat", "dog"]):
-    URL = await cat.get(animal, CAT_KEY, random.choice(["jpg", "gif"]))
+    URL = await getCat(animal, CAT_KEY, random.choice(["jpg", "gif"]))
     await context.response.send_message(URL)
 
 @client.tree.command(description = "Toggle a role.") ############################################################## role
