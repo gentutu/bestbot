@@ -241,25 +241,25 @@ async def coin(context: discord.Interaction, bet: Literal["heads", "tails"], ter
                               color       = colours["red"])
     await context.response.send_message(embed = embed)
 
-@client.tree.command(description = "Convert currency.") ########################################################### conv
-@app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
-async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, None],
-                                             source: CURRENCY_LIST, target: CURRENCY_LIST):
-    if not 'currencies.json' in os.listdir('./res'):
-        await currency.retrieve_currencies(CURRENCY_KEY)
-
-    with open('./res/currencies.json', 'r') as stored_curr:
-        available_curr = json.load(stored_curr)
-
-    if source == target:
-        await context.response.send_message("Nothing to convert.", ephemeral = True)
-        return
-
-    exchanged = await currency.currency_convert(CURRENCY_KEY, amount, source, target)
-    embed = discord.Embed(title       = "Currency conversion",
-                          description = f'{amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}',
-                          color       = colours["blue"])
-    await context.response.send_message(embed = embed)
+#@client.tree.command(description = "Convert currency.") ########################################################## conv
+#@app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
+#async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, None],
+#                                             source: CURRENCY_LIST, target: CURRENCY_LIST):
+#    if not 'currencies.json' in os.listdir('./res'):
+#        await currency.retrieve_currencies(CURRENCY_KEY)
+#
+#    with open('./res/currencies.json', 'r') as stored_curr:
+#        available_curr = json.load(stored_curr)
+#
+#    if source == target:
+#        await context.response.send_message("Nothing to convert.", ephemeral = True)
+#        return
+#
+#    exchanged = await currency.currency_convert(CURRENCY_KEY, amount, source, target)
+#    embed = discord.Embed(title       = "Currency conversion",
+#                          description = f'{amount:.2f} `{source}` ≈ `{target}` {exchanged:.2f}',
+#                          color       = colours["blue"])
+#    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Search the web.") ############################################################# find
 @app_commands.describe(engine = "Search engine", query = "Search query")
