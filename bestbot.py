@@ -180,8 +180,7 @@ async def on_ready():
 async def echoMessage(reason, message, colour): ############################################################ echoMessage
     echoChannel = client.get_channel(int(CHANNEL_ECHO))
 
-    if message.author.id == client.user.id:
-        return
+    if message.author.id == client.user.id: return
 
     if message.attachments:
         image = message.attachments[0]
@@ -191,10 +190,8 @@ async def echoMessage(reason, message, colour): ################################
         client.echoLog[message.guild.id] = (message.content,message.author, message.channel.name,
                                             message.created_at)
 
-    try:
-        image_proxy_url, contents,author, channel_name, time = client.echoLog[message.guild.id]
-    except:
-        contents,author, channel_name, time = client.echoLog[message.guild.id]
+    try:    image_proxy_url, contents,author, channel_name, time = client.echoLog[message.guild.id]
+    except: contents,author, channel_name, time = client.echoLog[message.guild.id]
 
     try:
         embed = discord.Embed(description = contents,
@@ -216,30 +213,6 @@ async def echoMessage(reason, message, colour): ################################
 
     async for entry in message.guild.audit_logs(action = discord.AuditLogAction.message_delete):
         action = discord.AuditLogAction.message_delete
-
-async def getCat(animal, apiKey, mimeType):
-    headers = {
-        'x-api-key'   : apiKey,
-        'Content-Type': 'application/json'
-    }
-    params = {
-        'mime_types': mimeType
-    }
-
-    if(animal == 'cat'):
-        API = 'https://api.thecatapi.com/v1/images/search'
-    elif(animal == 'dog'):
-        API = 'https://api.thedogapi.com/v1/images/search'
-    else:
-        return "Unknown API"
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(API, headers = headers, params = params) as response:
-            if response.status != 200 or 'application/json' not in response.headers['content-type']:
-                return "Cannot reach API"
-            else:
-                url = await response.json()
-                return url[0]['url']
 
 ########################################################################################################################
 # COMMANDS
@@ -267,7 +240,7 @@ async def coin(context: discord.Interaction, bet: Literal["heads", "tails"], ter
                               color       = colours["red"])
     await context.response.send_message(embed = embed)
 
-@client.tree.command(description = "Convert currency.") ########################################################## conv
+@client.tree.command(description = "Convert currency.") ########################################################### conv
 @app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
 async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, None],
                                              source: CURRENCY_LIST, target: CURRENCY_LIST):
@@ -337,8 +310,24 @@ async def ping(context: discord.Interaction):
 @client.tree.command(description = "Request a random animal picture.") ############################################# pls
 @app_commands.describe(animal = "Request type")
 async def pls(context: discord.Interaction, animal: Literal["cat", "dog"]):
-    URL = await getCat(animal, CAT_KEY, random.choice(["jpg", "gif"]))
-    await context.response.send_message(URL)
+    headers = {
+        'x-api-key'   : CAT_KEY,
+        'Content-Type': 'application/json'
+    }
+    params = {
+        'mime_types': random.choice(["jpg", "gif"])
+    }
+
+    if(  animal == 'cat'): API = 'https://api.thecatapi.com/v1/images/search'
+    elif(animal == 'dog'): API = 'https://api.thedogapi.com/v1/images/search'
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(API, headers = headers, params = params) as response:
+            if response.status != 200 or 'application/json' not in response.headers['content-type']:
+                await context.response.send_message(f'Cannot reach API', ephemeral = True)
+            else:
+                url = await response.json()
+                await context.response.send_message(url[0]['url'])
 
 @client.tree.command(description = "Toggle a role.") ############################################################## role
 @app_commands.describe(text = "Role to toggle")
@@ -448,19 +437,16 @@ async def on_message(message):
 
 @client.event ############################################################################################## edited echo
 async def on_message_edit(before, after):
-    if before.content == after.content:
-        return
+    if before.content == after.content: return
 
     await echoMessage("Edited from", before, colours["green"])
     await echoMessage("Edited to"  , after,  colours["blue"])
 
     current_message = after.content.lower()
-    if date.today().weekday() != 2 and ":wednesday:" in current_message:
-        await after.delete()
+    if date.today().weekday() != 2 and ":wednesday:" in current_message: await after.delete()
     else:
         for word in BLACKLIST:
-            if word in current_message.replace(" ", ""):
-                await after.delete()
+            if word in current_message.replace(" ", ""): await after.delete()
 
 @client.event ############################################################################################# deleted echo
 async def on_message_delete(message):
