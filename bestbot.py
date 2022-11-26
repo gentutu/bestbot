@@ -242,7 +242,7 @@ async def coin(context: discord.Interaction, bet: Literal["heads", "tails"], ter
 
 @client.tree.command(description = "Convert currency.") ########################################################### conv
 @app_commands.describe(amount = "Amount to convert", source = "Source currency", target = "Target currency")
-async def conv(context: discord.Interaction, amount: app_commands.Range[int, 1, None],
+async def conv(context: discord.Interaction, amount: app_commands.Range[float, 0.01, None],
                                              source: CURRENCY_LIST, target: CURRENCY_LIST):
     if source == target:
         await context.response.send_message("Nothing to convert.", ephemeral = True)
