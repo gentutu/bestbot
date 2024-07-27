@@ -365,6 +365,11 @@ async def source(context: discord.Interaction):
                           color       = colours["grey"])
     await context.response.send_message(embed = embed, ephemeral = True)
 
+@client.tree.command(description = "Request a sticker.") ####################################################### sticker
+@app_commands.describe(sticker = "Request type")
+async def sticker(context: discord.Interaction, sticker: Literal["goblin", "ogre"]):
+    await context.response.send_message(file=discord.File(f'res/sticker/{sticker}.png'))
+
 @client.tree.command(description = "Update a channel's topic.") ################################################ subject
 @app_commands.describe(text = "New channel topic")
 @app_commands.checks.has_any_role("admin", "mod")
