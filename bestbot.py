@@ -46,6 +46,7 @@ files = {
     'f_helixReplies' : 'res/helixReplies',
     'f_searchEngines': 'res/searchEngines',
     'f_serverToken'  : 'res/serverToken',
+    'd_stickers'     : 'res/sticker'
 }
 
 ########################################################################################################################
@@ -92,6 +93,18 @@ if os.path.exists(files["f_cosmeticRoles"]): ###################################
         COSMETIC_ROLES = Literal[tuple(COSMETIC_ROLES)]
 else:
     print(f'Error: {files["f_cosmeticRoles"]} file missing')
+    sys.exit()
+
+if os.path.exists(files["d_stickers"]): ####################################################################### stickers
+    global STICKERS
+    STICKERS=[file.split('.')[0] for file in os.listdir(files["d_stickers"])]
+    if STICKERS:
+        STICKERS = Literal[tuple(STICKERS)]
+    else:
+        print(f'Error: {files["d_stickers"]} directory empty')
+        sys.exit()
+else:
+    print(f'Error: {files["d_stickers"]} directory missing')
     sys.exit()
 
 if os.path.exists(files["f_currencyKey"]): ################################################################# currencyKey
@@ -367,7 +380,7 @@ async def source(context: discord.Interaction):
 
 @client.tree.command(description = "Request a sticker.") ####################################################### sticker
 @app_commands.describe(sticker = "Request type")
-async def sticker(context: discord.Interaction, sticker: Literal["goblin", "ogre"]):
+async def sticker(context: discord.Interaction, sticker: STICKERS):
     await context.response.send_message(file=discord.File(f'res/sticker/{sticker}.png'))
 
 @client.tree.command(description = "Update a channel's topic.") ################################################ subject
