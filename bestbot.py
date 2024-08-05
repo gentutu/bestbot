@@ -45,8 +45,7 @@ files = {
     'f_helixEmote'   : 'res/helixEmote',
     'f_helixReplies' : 'res/helixReplies',
     'f_searchEngines': 'res/searchEngines',
-    'f_serverToken'  : 'res/serverToken',
-    'd_stickers'     : 'res/sticker'
+    'f_serverToken'  : 'res/serverToken'
 }
 
 ########################################################################################################################
@@ -93,18 +92,6 @@ if os.path.exists(files["f_cosmeticRoles"]): ###################################
         COSMETIC_ROLES = Literal[tuple(COSMETIC_ROLES)]
 else:
     print(f'Error: {files["f_cosmeticRoles"]} file missing')
-    sys.exit()
-
-if os.path.exists(files["d_stickers"]): ####################################################################### stickers
-    global STICKERS
-    STICKERS=[file.split('.')[0] for file in os.listdir(files["d_stickers"])]
-    if STICKERS:
-        STICKERS = Literal[tuple(STICKERS)]
-    else:
-        print(f'Error: {files["d_stickers"]} directory empty')
-        sys.exit()
-else:
-    print(f'Error: {files["d_stickers"]} directory missing')
     sys.exit()
 
 if os.path.exists(files["f_currencyKey"]): ################################################################# currencyKey
@@ -378,11 +365,6 @@ async def source(context: discord.Interaction):
                           color       = colours["grey"])
     await context.response.send_message(embed = embed, ephemeral = True)
 
-@client.tree.command(description = "Request a sticker.") ####################################################### sticker
-@app_commands.describe(sticker = "Request type")
-async def sticker(context: discord.Interaction, sticker: STICKERS):
-    await context.response.send_message(file=discord.File(f'res/sticker/{sticker}.png'))
-
 @client.tree.command(description = "Update a channel's topic.") ################################################ subject
 @app_commands.describe(text = "New channel topic")
 @app_commands.checks.has_any_role("admin", "mod")
@@ -447,11 +429,11 @@ async def on_message(message):
             if dad_check.startswith('im '):
                 name = message.content.split()
                 name = ' '.join(name[1:])
-                await message.channel.send(f'hello {name} im dad')
+                await message.channel.send(f'hello {name} im dad. see https://eci.ec.europa.eu/045/public/#/screen/home, son')
             elif dad_check.startswith('i am '):
                 name = message.content.split()
                 name = ' '.join(name[2:])
-                await message.channel.send(f'hello {name} im dad')
+                await message.channel.send(f'hello {name} im dad. see https://eci.ec.europa.eu/045/public/#/screen/home, son')
 
 @client.event ############################################################################################## edited echo
 async def on_message_edit(before, after):
