@@ -285,15 +285,6 @@ async def helix(context: discord.Interaction, question: str):
                           color       = colours["grey"])
     await context.response.send_message(embed = embed)
 
-@client.tree.command(description = "Show the host\'s WAN IP.") ###################################################### ip
-@app_commands.checks.has_role("admin")
-async def ip(context: discord.Interaction):
-    host_wan_ip = get('https://api.ipify.org').text
-    embed = discord.Embed(title       = "Host WAN IP",
-                          description = f'||`{host_wan_ip}`||',
-                          color       = colours["red"])
-    await context.response.send_message(embed = embed, ephemeral = True)
-
 @client.tree.command(description = "Request a fun fact about numbers.") ######################################### number
 @app_commands.describe(fact = "Type of fun fact")
 async def number(context: discord.Interaction, fact: Literal["date", "math", "trivia", "year"]):
