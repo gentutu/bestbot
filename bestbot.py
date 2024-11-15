@@ -285,6 +285,14 @@ async def helix(context: discord.Interaction, question: str):
                           color       = colours["grey"])
     await context.response.send_message(embed = embed)
 
+@client.tree.command(description = "Talk weird instead of normally.") ############################################## mee
+@app_commands.describe(text = "Emphasized text")
+async def mee(context: discord.Interaction, text: str):
+    embed = discord.Embed(title       = "",
+                          description = f'*{context.user.global_name} {text}*',
+                          color       = colours["grey"])
+    await context.response.send_message(embed = embed)
+
 @client.tree.command(description = "Request a fun fact about numbers.") ######################################### number
 @app_commands.describe(fact = "Type of fun fact")
 async def number(context: discord.Interaction, fact: Literal["date", "math", "trivia", "year"]):
