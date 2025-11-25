@@ -293,14 +293,14 @@ async def mee(context: discord.Interaction, text: str):
                           color       = colours["grey"])
     await context.response.send_message(embed = embed)
 
-@client.tree.command(description = "Request a fun fact about numbers.") ######################################### number
-@app_commands.describe(fact = "Type of fun fact")
-async def number(context: discord.Interaction, fact: Literal["date", "math", "trivia", "year"]):
-    funFact = get(f'http://numbersapi.com/random/{fact}').text
-    embed = discord.Embed(title       = "Number fun fact",
-                          description = funFact,
-                          color       = colours["grey"])
-    await context.response.send_message(embed = embed)
+#@client.tree.command(description = "Request a fun fact about numbers.") ######################################### number
+#@app_commands.describe(fact = "Type of fun fact")
+#async def number(context: discord.Interaction, fact: Literal["date", "math", "trivia", "year"]):
+#    funFact = get(f'http://numbersapi.com/random/{fact}').text
+#    embed = discord.Embed(title       = "Number fun fact",
+#                          description = funFact,
+#                          color       = colours["grey"])
+#    await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Check network quality.") ###################################################### ping
 async def ping(context: discord.Interaction):
@@ -393,7 +393,6 @@ async def timezone(context: discord.Interaction, zone: str):
     await context.response.send_message(embed = embed)
 
 @client.tree.command(description = "Show the system uptime.") ################################################### uptime
-@app_commands.checks.has_any_role("admin", "mod")
 async def uptime(context: discord.Interaction):
     with open('/proc/uptime', 'r') as uptimeFile:
         time = float(uptimeFile.readline().split()[0])
@@ -401,7 +400,7 @@ async def uptime(context: discord.Interaction):
     days  = time / 86400
     hours = time / 3600 % 24
 
-    await context.response.send_message(f'Approximate uptime: `{int(days)}d {int(hours)}h`', ephemeral = True)
+    await context.response.send_message(f'Approximate uptime: `{int(days)}d {int(hours)}h`')
 
 ########################################################################################################################
 # EVENTS
